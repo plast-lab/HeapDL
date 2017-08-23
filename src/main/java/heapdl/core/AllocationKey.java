@@ -1,4 +1,4 @@
-package heapdl.dynamicanalysis;
+package heapdl.core;
 
 import com.sun.tools.hat.internal.model.JavaClass;
 import com.sun.tools.hat.internal.model.StackFrame;

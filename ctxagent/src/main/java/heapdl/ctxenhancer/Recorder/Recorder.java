@@ -17,7 +17,7 @@ public final class Recorder {
     private static Object[] previousThis = new Object[0x1000];
     private static Map<Class<?>,Integer> sampled = new ConcurrentHashMap<>();
 
-    // BEWARE! Dragons! Do not modify this code!
+    // BEWARE! Dragons! Do not modify this core!
 
     public static void recordCall(Object receiver) {
         Object previousReceiver = previousThis[(int) Thread.currentThread().getId()];

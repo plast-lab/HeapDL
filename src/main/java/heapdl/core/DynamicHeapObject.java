@@ -1,4 +1,4 @@
-package heapdl.dynamicanalysis;
+package heapdl.core;
 
 /**
  * Created by neville on 15/02/2017.

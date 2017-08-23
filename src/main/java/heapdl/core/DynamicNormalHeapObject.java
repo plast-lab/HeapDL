@@ -1,4 +1,4 @@
-package heapdl.dynamicanalysis;
+package heapdl.core;
 
 import heapdl.io.Database;
 import heapdl.io.PredicateFile;

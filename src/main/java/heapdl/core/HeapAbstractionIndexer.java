@@ -1,4 +1,4 @@
-package heapdl.dynamicanalysis;
+package heapdl.core;
 
 import com.sun.tools.hat.internal.model.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static heapdl.dynamicanalysis.DumpParsingUtil.fullyQualifiedMethodSignatureFromFrame;
+import static heapdl.core.DumpParsingUtil.fullyQualifiedMethodSignatureFromFrame;
 
 /**
  * Created by neville on 15/03/2017.
