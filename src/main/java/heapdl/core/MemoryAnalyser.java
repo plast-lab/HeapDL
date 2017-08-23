@@ -41,7 +41,7 @@ public class MemoryAnalyser {
 
         try {
             Class<?> heapAbstractionIndexerClass = Class.forName(
-                    getClass().getPackage()+".HeapAbstractionIndexer" + sensitivity
+                    getClass().getPackage().getName()+".HeapAbstractionIndexer" + sensitivity
             );
             heapAbstractionIndexer = (HeapAbstractionIndexer) heapAbstractionIndexerClass
                     .getConstructor(Snapshot.class)
