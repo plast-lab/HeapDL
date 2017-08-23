@@ -19,7 +19,7 @@ public class Transformer implements ClassFileTransformer {
     }
 
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException, NotFoundException {
-        this.homeDir = System.getenv("HOME");
+        homeDir = System.getenv("HOME");
         if (homeDir == null) {
             System.err.println("Cannot find HOME environment variable, aborting.");
             System.exit(-1);
