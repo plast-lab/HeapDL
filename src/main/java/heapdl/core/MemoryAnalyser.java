@@ -41,7 +41,7 @@ public class MemoryAnalyser {
 
         try {
             Class<?> heapAbstractionIndexerClass = Class.forName(
-                    "heapdl.main.core.HeapAbstractionIndexer" + sensitivity
+                    getClass().getPackage()+".HeapAbstractionIndexer" + sensitivity
             );
             heapAbstractionIndexer = (HeapAbstractionIndexer) heapAbstractionIndexerClass
                     .getConstructor(Snapshot.class)
@@ -65,7 +65,7 @@ public class MemoryAnalyser {
                 JavaObject obj = (JavaObject) heap;
                 String baseHeap = heapAbstractionIndexer.getAllocationAbstraction(obj);
                 JavaClass clazz = obj.getClazz();
-                if (obj.getClazz().toString().startsWith("Instrumentation") ||
+                if (obj.getClazz().toString().startsWith("heapdl") ||
                         obj.getClazz().toString().startsWith("javassist")) return;
                 do {
                     for (JavaField field : clazz.getFields()) {
@@ -107,7 +107,7 @@ public class MemoryAnalyser {
 
         try {
             long startTime = System.nanoTime();
-            resolveFactsFromDump("2ObjH");
+            resolveFactsFromDump(sensitivity);
             long endTime = System.nanoTime();
             long durationSeconds = (endTime - startTime) / 1000000000;
             System.out.println("Heap dump analysis time: " + durationSeconds);
