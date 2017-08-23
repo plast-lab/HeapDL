@@ -19,14 +19,19 @@ public class Main {
                     + "  heapdl --version\n"
                     + "\n"
                     + "Options:\n"
-                    + "  -h --help     Show this screen.\n"
-                    + "  --version     Show version.\n"
+                    + "  -h --help                    Show this screen.\n"
+                    + "  --version                    Show version.\n"
                     + "  --sensitivity=<sensitivity>  Context sensitivity (e.g. 2ObjH) [default: Insensitive].\n"
-                    + "  --unique-strings      Whether or not to extract string constants from heap dump.\n"
+                    + "  --unique-strings             Extract string constants from heap dump.\n"
                     + "\n";
+
     public static void main(String[] args) {
+            String version = Main.class.getPackage().getImplementationVersion();
             Map<String, Object> opts =
-                    new Docopt(doc).withVersion("HeapDL 1.0").parse(args);
+                    new Docopt(doc)
+                            .withVersion("HeapDL "+ (version == null ? "DEVELOPMENT" : version))
+                            .parse(args);
+
             MemoryAnalyser m = new MemoryAnalyser((String)opts.get("<hprof1>"), (boolean) opts.get("--unique-strings"));
     }
 }
