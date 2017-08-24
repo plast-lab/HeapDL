@@ -69,7 +69,7 @@ public class Transformer implements ClassFileTransformer {
 
             //cls = getCtClass(className);
         } catch (Throwable e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
 
