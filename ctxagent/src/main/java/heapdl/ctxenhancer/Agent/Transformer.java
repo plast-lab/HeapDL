@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class Transformer implements ClassFileTransformer {
 
-    private static boolean debug = true;
+    private static boolean debug = false;
     private static String homeDir;
     private boolean optInstrumentCGE = true;
     public Transformer(boolean optInstrumentCGE) {
