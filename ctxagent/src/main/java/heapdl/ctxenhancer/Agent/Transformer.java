@@ -14,9 +14,12 @@ public class Transformer implements ClassFileTransformer {
     private static boolean debug = false;
     private static String homeDir;
     private boolean optInstrumentCGE = true;
-    public Transformer(boolean optInstrumentCGE) {
+    public Transformer(boolean optInstrumentCGE, String benchmark) {
         this.optInstrumentCGE = optInstrumentCGE;
     }
+
+    private static String dacapoJar;
+    private static String dacapoDeps;
 
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException, NotFoundException {
         homeDir = System.getenv("HOME");
@@ -28,11 +31,26 @@ public class Transformer implements ClassFileTransformer {
         }
 
         ClassPool cp = ClassPool.getDefault();
-        cp.insertClassPath(homeDir + "/doop-benchmarks/dacapo-bach/avrora.jar");
-        cp.insertClassPath(homeDir + "/doop-benchmarks/dacapo-bach/avrora-deps.jar");
+        cp.insertClassPath(homeDir + dacapoJar);
+        cp.insertClassPath(homeDir + dacapoDeps);
         boolean optCGE = (args != null) && args.contains("cg");
-        inst.addTransformer(new Transformer(optCGE));
 
+        final String[] benchmarks = new String[] { "avrora", "batik", "eclipse", "h2", "jython", "luindex", "lusearch", "pmd", "sunflow", "tradebeans", "xalan" };
+        String benchmark = null;
+        for (String b : benchmarks) {
+            if (args != null && args.contains(b)) {
+                benchmark = b;
+                break;
+            }
+        }
+        if (benchmark == null) {
+            System.err.println("No suitable benchmark defined in agent options: " + args);
+            System.exit(-1);
+        } else {
+            dacapoJar = "/doop-benchmarks/dacapo-bach/" + benchmark + ".jar";
+            dacapoDeps = "/doop-benchmarks/dacapo-bach/" + benchmark + "-deps.jar";
+            inst.addTransformer(new Transformer(optCGE, benchmark));
+        }
     }
 
     private static boolean isLibraryClass(String name) {
@@ -64,8 +82,8 @@ public class Transformer implements ClassFileTransformer {
         debugMessage("Transforming: " + className);
         try {
             ClassPool cp = ClassPool.getDefault();
-            cp.appendClassPath(homeDir + "/doop-benchmarks/dacapo-bach/avrora.jar");
-            cp.appendClassPath(homeDir + "/doop-benchmarks/dacapo-bach/avrora-deps.jar");
+            cp.appendClassPath(homeDir + dacapoJar);
+            cp.appendClassPath(homeDir + dacapoDeps);
             //cp.insertClassPath(new ByteArrayClassPath(className.replace("/","."), classFile));
             cls = cp.get(className.replace("/","."));
 
