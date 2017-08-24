@@ -47,8 +47,10 @@ public class Transformer implements ClassFileTransformer {
             return false;
         if (nameDots.startsWith("heapdl.ctxenhancer"))
             return false;
-        if (nameDots.equals("java.lang.String"))
+        if (nameDots.equals("java.lang.Integer"))
             return false;
+        // if (nameDots.equals("java.lang.String"))
+        //     return false;
         // if (nameDots.equals("java.lang.StringBuilder"))
         //     return false;
         debugMessage("interesting class: " + nameDots);
