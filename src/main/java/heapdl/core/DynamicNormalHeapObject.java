@@ -10,14 +10,14 @@ public class DynamicNormalHeapObject implements DynamicHeapObject {
 
 
     private String representation;
-    private String lineNumber;
+    private int lineNumber;
     private String inMethod;
     private String type;
     private String contextRepresentation;
 
     private String heapRepresentation;
 
-    public DynamicNormalHeapObject(String lineNumber, String inMethod, String type, String contextRepresentation) {
+    public DynamicNormalHeapObject(int lineNumber, String inMethod, String type, String contextRepresentation) {
         this.contextRepresentation = contextRepresentation;
         this.lineNumber = lineNumber;
         this.inMethod = inMethod;
@@ -26,14 +26,14 @@ public class DynamicNormalHeapObject implements DynamicHeapObject {
         representation = heapRepresentation + "@" + contextRepresentation;
     }
 
-    public static String getAllocationRepresentation(String lineNumber, String inMethod, String type) {
+    public static String getAllocationRepresentation(int lineNumber, String inMethod, String type) {
         return inMethod + ":" + lineNumber + "/new " + type;
     }
 
 
     @Override
     public void write_fact(Database db) {
-        db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_ALLOCATION, lineNumber, inMethod, type, heapRepresentation);
+        db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_ALLOCATION, ""+lineNumber, inMethod, type, heapRepresentation);
         db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_OBJECT, heapRepresentation, contextRepresentation, representation);
     }
 
@@ -51,10 +51,6 @@ public class DynamicNormalHeapObject implements DynamicHeapObject {
         return heapRepresentation;
     }
 
-    public String getType() {
-        return type;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,11 +66,4 @@ public class DynamicNormalHeapObject implements DynamicHeapObject {
         return getRepresentation() != null ? getRepresentation().hashCode() : 0;
     }
 
-    public String getLineNumber() {
-        return lineNumber;
-    }
-
-    public String getInMethod() {
-        return inMethod;
-    }
 }

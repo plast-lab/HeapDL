@@ -16,7 +16,7 @@ public class DynamicCallGraphEdge implements DynamicFact {
     private final String contextFrom;
     private final String contextTo;
     private final String methodFrom;
-    private final String lineNumberFrom;
+    private final int lineNumberFrom;
 
     private final String methodTo;
 
@@ -28,19 +28,19 @@ public class DynamicCallGraphEdge implements DynamicFact {
         DynamicCallGraphEdge that = (DynamicCallGraphEdge) o;
 
         if (!methodFrom.equals(that.methodFrom)) return false;
-        if (!lineNumberFrom.equals(that.lineNumberFrom)) return false;
+        if (lineNumberFrom != that.lineNumberFrom) return false;
         if (!contextFrom.equals(that.contextFrom)) return false;
         if (!contextTo.equals(that.contextTo)) return false;
 
-        return getMethodTo().equals(that.getMethodTo());
+        return methodTo.equals(that.methodTo);
     }
 
     @Override
     public int hashCode() {
 
         int result = methodFrom.hashCode();
-        result = 31 * result + getLineNumberFrom().hashCode();
-        result = 31 * result + getMethodTo().hashCode();
+        result = 31 * result + lineNumberFrom;
+        result = 31 * result + methodTo.hashCode();
         result = 31 * result + contextFrom.hashCode();
         result = 31 * result + contextTo.hashCode();
         return result;
@@ -49,7 +49,6 @@ public class DynamicCallGraphEdge implements DynamicFact {
     public DynamicCallGraphEdge(String methodFrom, String lineNumberFrom, String methodTo, String contextFrom, String contextTo) {
         this.contextFrom = contextFrom;
         this.contextTo = contextTo;
-
         this.methodFrom = methodFrom;
         this.lineNumberFrom = DumpParsingUtil.parseLineNumber(lineNumberFrom);
         this.methodTo = methodTo;
@@ -86,17 +85,8 @@ public class DynamicCallGraphEdge implements DynamicFact {
                 '}';
     }
 
-    public String getLineNumberFrom() {
-        return lineNumberFrom;
-    }
-
-    public String getMethodTo() {
-        return methodTo;
-    }
-
-
     @Override
     public void write_fact(Database db) {
-        db.add(PredicateFile.DYNAMIC_CALL_GRAPH_EDGE, methodFrom, lineNumberFrom, methodTo, contextFrom, contextTo);
+        db.add(PredicateFile.DYNAMIC_CALL_GRAPH_EDGE, methodFrom, "" + lineNumberFrom, methodTo, contextFrom, contextTo);
     }
 }

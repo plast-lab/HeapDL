@@ -113,7 +113,7 @@ public class HeapAbstractionIndexer2ObjH extends HeapAbstractionIndexer {
 
         String fullyQualifiedMethodSignature = fullyQualifiedMethodSignatureFromFrame(frame);
 
-        return new ContextObj(frame.getLineNumber(), fullyQualifiedMethodSignature, cls.getName(), true);
+        return new ContextObj(DumpParsingUtil.parseLineNumber(frame.getLineNumber()), fullyQualifiedMethodSignature, cls.getName(), true);
 
     }
 

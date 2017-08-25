@@ -70,7 +70,7 @@ class HeapAbstractionIndexer {
 
             String fullyQualifiedMethodName = fullyQualifiedMethodSignatureFromFrame(f);
 
-            return new DynamicNormalHeapObject(f.getLineNumber(), fullyQualifiedMethodName, cls.getName(), hctx.getRepresentation());
+            return new DynamicNormalHeapObject(DumpParsingUtil.parseLineNumber(f.getLineNumber()), fullyQualifiedMethodName, cls.getName(), hctx.getRepresentation());
         };
 
         final AllocationKey allocationKey = new AllocationKey(frame, cls);
@@ -81,7 +81,7 @@ class HeapAbstractionIndexer {
         }
 
 
-        if (frame == null) return new DynamicNormalHeapObject(UNKNOWN, UNKNOWN, cls.getName(), hctx.getRepresentation());
+        if (frame == null) return new DynamicNormalHeapObject(DumpParsingUtil.UNKNOWN_LINE, UNKNOWN, cls.getName(), hctx.getRepresentation());
 
         return heapObjectFromFrame.apply(allocationKey);
     }

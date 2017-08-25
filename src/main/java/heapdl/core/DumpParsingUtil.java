@@ -11,14 +11,14 @@ import java.util.Arrays;
  * Created by neville on 27/01/2017.
  */
 public class DumpParsingUtil {
-    public static final int BIG_NUMBER = 999;
+    public static final int UNKNOWN_LINE = 0;
 
-    public static String parseLineNumber(String lineNumber) {
+    public static int parseLineNumber(String lineNumber) {
         try {
             int a = Integer.parseInt(lineNumber);
-            return "" + a;
+            return a;
         } catch (NumberFormatException e) {
-            return "0";
+            return UNKNOWN_LINE;
         }
     }
 

@@ -8,7 +8,7 @@ import heapdl.io.PredicateFile;
  */
 public class ContextObj implements ComposableContext {
 
-    private final String lineNumber;
+    private final int lineNumber;
     private final String inMethod;
     private final String type;
     private final String representation;
@@ -29,7 +29,7 @@ public class ContextObj implements ComposableContext {
         return getRepresentation() != null ? getRepresentation().hashCode() : 0;
     }
 
-    public ContextObj(String lineNumber, String inMethod, String type, boolean createHeapAllocation) {
+    public ContextObj(int lineNumber, String inMethod, String type, boolean createHeapAllocation) {
         this.lineNumber = lineNumber;
         this.inMethod = inMethod;
         this.type = type;
@@ -38,7 +38,7 @@ public class ContextObj implements ComposableContext {
     }
 
     public ContextObj(String representation) {
-        lineNumber = null;
+        lineNumber = 0;
         type = null;
         inMethod = null;
         this.createHeapAllocation = false;
@@ -51,7 +51,7 @@ public class ContextObj implements ComposableContext {
         args[0] = representation;
         db.add(PredicateFile.DYNAMIC_CONTEXT, representation, args);
         if (createHeapAllocation)
-            db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_ALLOCATION, lineNumber, inMethod, type, representation);
+            db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_ALLOCATION, ""+lineNumber, inMethod, type, representation);
     }
 
     public int getStartIndex() { return 0; }
