@@ -1,38 +1,22 @@
 package heapdl.ctxenhancer.Agent;
 
-import javassist.expr.*;
-import javassist.*;
-
 import java.io.*;
-
 import java.lang.instrument.*;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
+import org.objectweb.asm.*;
+
 public class Transformer implements ClassFileTransformer {
 
     private static boolean debug = false;
-    private static String homeDir;
     private boolean optInstrumentCGE = true;
     public Transformer(boolean optInstrumentCGE, String benchmark) {
         this.optInstrumentCGE = optInstrumentCGE;
     }
 
-    private static String dacapoJar;
-    private static String dacapoDeps;
+    public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException {
 
-    public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException, NotFoundException {
-        homeDir = System.getenv("HOME");
-        if (homeDir == null) {
-            System.err.println("Cannot find HOME environment variable, aborting.");
-            System.exit(-1);
-        } else {
-            debugMessage("Found HOME = " + homeDir);
-        }
-
-        ClassPool cp = ClassPool.getDefault();
-        cp.insertClassPath(homeDir + dacapoJar);
-        cp.insertClassPath(homeDir + dacapoDeps);
         boolean optCGE = (args != null) && args.contains("cg");
 
         final String[] benchmarks = new String[] { "avrora", "batik", "eclipse", "h2", "jython", "luindex", "lusearch", "pmd", "sunflow", "tradebeans", "xalan" };
@@ -47,34 +31,45 @@ public class Transformer implements ClassFileTransformer {
             System.err.println("No suitable benchmark defined in agent options: " + args);
             System.exit(-1);
         } else {
-            dacapoJar = "/doop-benchmarks/dacapo-bach/" + benchmark + ".jar";
-            dacapoDeps = "/doop-benchmarks/dacapo-bach/" + benchmark + "-deps.jar";
             inst.addTransformer(new Transformer(optCGE, benchmark));
         }
     }
 
     private static boolean isLibraryClass(String name) {
-        return name == null || name.startsWith("java") || name.startsWith("Instrumentation") || name.startsWith("sun");
+        return name == null || name.startsWith("java") || name.startsWith("Instrumentation") || name.startsWith("sun") || name.startsWith("heapdl");
     }
 
-    private static boolean isInterestingClass(String name) {
-        String nameDots = name.replace("/", ".");
-        if (nameDots.startsWith("javassist"))
-            return false;
-        if (nameDots.startsWith("Instrumentation"))
-            return false;
-        if (nameDots.startsWith("heapdl.ctxenhancer"))
-            return false;
-        // if (nameDots.equals("java.lang.Integer"))
-        //     return false;
-        // if (nameDots.equals("java.lang.String"))
-        //     return false;
-        // if (nameDots.equals("java.lang.StringBuilder"))
-        //     return false;
-        debugMessage("interesting class: " + nameDots);
-        return true;
+    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+                            ProtectionDomain pd, byte[] classFile) throws IllegalClassFormatException {
+        if (isLibraryClass(className)) return null;
+        debugMessage("Transforming: " + className);
+
+        ClassReader reader = new ClassReader(classFile);
+        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS |
+                                                     ClassWriter.COMPUTE_FRAMES);
+        ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE);
+        reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
+
+        byte[] ret = writer.toByteArray();
+        final boolean saveBytecode = true;
+        if (debug || saveBytecode) {
+            try {
+                String outDir = "out";
+                (new java.io.File(outDir)).mkdir();
+                OutputStream out = new FileOutputStream(outDir + "/" + className.replace("/", "_") + ".class");
+                out.write(ret);
+                out.flush();
+                out.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return ret;
     }
 
+    /*
+    // Original implementation using Javassist.
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain pd, byte[] classFile) throws IllegalClassFormatException {
         CtClass cls = null;
@@ -162,14 +157,12 @@ public class Transformer implements ClassFileTransformer {
         return null;
 
     }
+    */
 
-    private static void debugMessage(String msg) {
-        if (debug)
+    public static void debugMessage(String msg) {
+        if (debug) {
             System.err.println("Context-Agent: " + msg);
-    }
-
-    private static CtClass getCtClass(String className) throws NotFoundException {
-        ClassPool cp = ClassPool.getDefault();
-        return cp.get(className.replace("/", "."));
+            System.err.flush();
+        }
     }
 }
