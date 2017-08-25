@@ -1,7 +1,5 @@
 package heapdl.ctxenhancer.Recorder;
 
-
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +13,7 @@ public final class Recorder {
     private static final ArrayList<EdgeContexts> edgeContexts = new ArrayList<>(INITIAL_CAPACITY);
 
     private static Object[] previousThis = new Object[0x1000];
-    private static Map<Class<?>,Integer> sampled = new ConcurrentHashMap<>();
+    private static Map<Class<?>, Int> sampled = new ConcurrentHashMap<>();
 
     // BEWARE! Dragons! Do not modify this core!
 
@@ -23,10 +21,10 @@ public final class Recorder {
         Object previousReceiver = previousThis[(int) Thread.currentThread().getId()];
         if (previousReceiver != null) {
             Class<?> klass = receiver.getClass();
-            Integer oldO = sampled.get(klass);
+            Int oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, new Int(old + 1));
                 edgeContexts.add(new EdgeContexts(previousReceiver, receiver));
             }
         }
@@ -40,31 +38,32 @@ public final class Recorder {
         previousThis[(int) Thread.currentThread().getId()] = receiver;
     }
 
-    public static void recordStatic(Object obj) {
+    public static Object recordStatic(Object obj) {
         Object hctx = previousThis[(int) Thread.currentThread().getId()];
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
-            Integer oldO = sampled.get(klass);
+            Int oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, new Int(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
+        return obj;
     }
 
-    public static void record(Object hctx, Object obj) {
+    public static Object record(Object hctx, Object obj) {
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
-            Integer oldO = sampled.get(klass);
+            Int oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, new Int(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
+        return obj;
     }
-
 
     private static final class ObjectAndContext {
         //TODO use soft references here
@@ -87,4 +86,16 @@ public final class Recorder {
     }
 
 
+}
+
+// Used instead of java.lang.Integer to avoid stack overflow when the
+// agent uses the instrumented wrapper class.
+class Int {
+    private int value;
+    public Int(int value) {
+        this.value = value;
+    }
+    public int intValue() {
+        return value;
+    }
 }
