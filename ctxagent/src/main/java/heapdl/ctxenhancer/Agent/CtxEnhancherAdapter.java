@@ -42,6 +42,13 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         private boolean instrCGE;
         private boolean isStatic;
 
+        // Computes the extra stack requirements for the
+        // instrumentation in this method. Currently unused (TODO).
+        private int extraStack;
+
+        // Used in the two-step instrumentation of new().
+        private String lastNewType = null;
+
         public MethodEntryAdapter(int access,
                                   String methName,
                                   String desc,
@@ -55,6 +62,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             this.desc      = desc;
             this.instrCGE  = instrCGE;
             this.isStatic  = isStatic;
+            this.extraStack = 0;
         }
 
         @Override
@@ -65,7 +73,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // Call heapdl.ctxenhancer.Recorder.Recorder.recordCall(),
                 // using "this" as its argument.
                 super.visitVarInsn(Opcodes.ALOAD, 0);
-                super.visitMethodInsn(INVOKESTATIC, "heapdl/ctxenhancer/Recorder/Recorder",
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                      "heapdl/ctxenhancer/Recorder/Recorder",
                                       "recordCall", "(Ljava/lang/Object;)V");
             }
         }
@@ -88,40 +97,48 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             return true;
         }
 
-        private String lastNewType = null;
-
         // Records the creation of new objects without changing the
         // stack size needed for the current method.
         private void recordNewObj() {
             if (isStatic) {
-                System.err.println("TODO: recordStatic()");
-                // super.visitMethodInsn(INVOKESTATIC,
-                //                       "heapdl/ctxenhancer/Recorder/Recorder",
-                //                       "recordStatic",
-                //                       "(Ljava/lang/Object;)Ljava/lang/Object;");
+                // System.err.println("TODO: recordStatic()");
+                extraStack += 1;
+                super.visitInsn(Opcodes.DUP);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                      "heapdl/ctxenhancer/Recorder/Recorder",
+                                      "recordStatic",
+                                      "(Ljava/lang/Object;)V");
             } else {
-                System.err.println("TODO: record()");
-                // super.visitVarInsn(Opcodes.ALOAD, 0);
-                // super.visitInsn(Opcodes.SWAP);
-                // super.visitMethodInsn(INVOKESTATIC,
-                //                       "heapdl/ctxenhancer/Recorder/Recorder",
-                //                       "record",
-                //                       "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+                // TODO: record()-instrumentation currently ignores
+                // constructor bodies.
+                if (methName.equals("<init>"))
+                    return;
+                extraStack += 2;
+                super.visitInsn(Opcodes.DUP);
+                // Leaving out the following NOP creates a wrong D2I.
+                super.visitInsn(Opcodes.NOP);
+                super.visitVarInsn(Opcodes.ALOAD, 0);
+                super.visitInsn(Opcodes.SWAP);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                      "heapdl/ctxenhancer/Recorder/Recorder",
+                                      "record",
+                                      "(Ljava/lang/Object;Ljava/lang/Object;)V");
             }
         }
 
         private void callMerge() {
             if (isStatic) {
-                // super.visitMethodInsn(INVOKESTATIC,
-                //                       "heapdl/ctxenhancer/Recorder/Recorder",
-                //                       "mergeStatic",
-                //                       "()V");
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                      "heapdl/ctxenhancer/Recorder/Recorder",
+                                      "mergeStatic",
+                                      "()V");
             } else {
-                // super.visitVarInsn(Opcodes.ALOAD, 0);
-                // super.visitMethodInsn(INVOKESTATIC,
-                //                       "heapdl/ctxenhancer/Recorder/Recorder",
-                //                       "merge",
-                //                       "(Ljava/lang/Object;)V");
+                extraStack += 1;
+                super.visitVarInsn(Opcodes.ALOAD, 0);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                      "heapdl/ctxenhancer/Recorder/Recorder",
+                                      "merge",
+                                      "(Ljava/lang/Object;)V");
             }
         }
 
@@ -132,11 +149,17 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                     String desc,
                                     boolean itf) {
 
+            // TODO: currently we don't instrument constructor calls.
+            if (methName.equals("<init>")) {
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
+                return;
+            }
+
             // Call "merge" before calling non-<init> methods. For
             // <init> methods, look further down in this method.
             if (!name.equals("<init>")) {
-                System.err.println("TODO: callMerge()");
-                callMerge();
+                debugMessage("TODO: callMerge()");
+                // callMerge();
             }
 
             super.visitMethodInsn(opcode, owner, name, desc, itf);
@@ -169,7 +192,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             // only those calls to <init> that do not return (due to
             // effects such as exceptions or exiting the program).
             if (name.equals("<init>")) {
-                System.err.println("TODO: callMerge() for <init>");
                 callMerge();
             }
         }

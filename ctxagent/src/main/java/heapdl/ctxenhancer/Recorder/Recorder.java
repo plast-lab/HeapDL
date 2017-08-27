@@ -38,7 +38,7 @@ public final class Recorder {
         previousThis[(int) Thread.currentThread().getId()] = receiver;
     }
 
-    public static Object recordStatic(Object obj) {
+    public static void recordStatic(Object obj) {
         Object hctx = previousThis[(int) Thread.currentThread().getId()];
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
@@ -49,10 +49,9 @@ public final class Recorder {
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
-        return obj;
     }
 
-    public static Object record(Object hctx, Object obj) {
+    public static void record(Object hctx, Object obj) {
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
             Int oldO = sampled.get(klass);
@@ -62,7 +61,6 @@ public final class Recorder {
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
-        return obj;
     }
 
     private static final class ObjectAndContext {
