@@ -6,6 +6,7 @@ import java.security.ProtectionDomain;
 import java.util.Arrays;
 
 import org.objectweb.asm.*;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 public class Transformer implements ClassFileTransformer {
 
@@ -51,8 +52,19 @@ public class Transformer implements ClassFileTransformer {
         reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
 
         byte[] ret = writer.toByteArray();
-        final boolean saveBytecode = true;
-        if (debug || saveBytecode) {
+        if (debug) {
+            ClassReader debugReader = new ClassReader(ret);
+            ClassWriter debugWriter = new ClassWriter(reader,
+                                                      ClassWriter.COMPUTE_MAXS |
+                                                      ClassWriter.COMPUTE_FRAMES);
+            try {
+                debugReader.accept(new CheckClassAdapter(debugWriter), 0);
+            } catch (RuntimeException ex) {
+                ex.printStackTrace();
+                System.exit(-1);
+            }
+
+            // Save bytecode.
             try {
                 String outDir = "out";
                 (new java.io.File(outDir)).mkdir();
