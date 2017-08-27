@@ -10,7 +10,10 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 public class Transformer implements ClassFileTransformer {
 
+    // Debugging flags.
     private static boolean debug = false;
+    private static boolean saveBytecode = false;
+
     private boolean optInstrumentCGE = true;
     public Transformer(boolean optInstrumentCGE, String benchmark) {
         this.optInstrumentCGE = optInstrumentCGE;
@@ -52,11 +55,12 @@ public class Transformer implements ClassFileTransformer {
         reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
 
         byte[] ret = writer.toByteArray();
-        if (debug) {
+        if (debug || saveBytecode) {
             // Save bytecode.
             debugWriteClass(className, ret);
             debugWriteClass(className + ".orig", classFile);
-
+        }
+        if (debug) {
             // Check bytecode using ASM's CheckClassAdapter.
             ClassReader debugReader = new ClassReader(ret);
             ClassWriter debugWriter = new ClassWriter(reader,
