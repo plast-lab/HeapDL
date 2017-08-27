@@ -101,7 +101,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         // stack size needed for the current method.
         private void recordNewObj() {
             if (isStatic) {
-                // System.err.println("TODO: recordStatic()");
                 extraStack += 1;
                 super.visitInsn(Opcodes.DUP);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
