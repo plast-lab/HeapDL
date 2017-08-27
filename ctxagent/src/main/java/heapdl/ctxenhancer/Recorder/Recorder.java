@@ -13,7 +13,7 @@ public final class Recorder {
     private static final ArrayList<EdgeContexts> edgeContexts = new ArrayList<>(INITIAL_CAPACITY);
 
     private static Object[] previousThis = new Object[0x1000];
-    private static Map<Class<?>, Int> sampled = new ConcurrentHashMap<>();
+    private static Map<Class<?>, Integer> sampled = new ConcurrentHashMap<>();
 
     // BEWARE! Dragons! Do not modify this core!
 
@@ -21,10 +21,10 @@ public final class Recorder {
         Object previousReceiver = previousThis[(int) Thread.currentThread().getId()];
         if (previousReceiver != null) {
             Class<?> klass = receiver.getClass();
-            Int oldO = sampled.get(klass);
+            Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Int(old + 1));
+                sampled.put(klass, new Integer(old + 1));
                 edgeContexts.add(new EdgeContexts(previousReceiver, receiver));
             }
         }
@@ -42,10 +42,10 @@ public final class Recorder {
         Object hctx = previousThis[(int) Thread.currentThread().getId()];
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
-            Int oldO = sampled.get(klass);
+            Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Int(old + 1));
+                sampled.put(klass, new Integer(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
@@ -54,10 +54,10 @@ public final class Recorder {
     public static void record(Object hctx, Object obj) {
         if (hctx != null) {
             Class<?> klass = hctx.getClass();
-            Int oldO = sampled.get(klass);
+            Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Int(old + 1));
+                sampled.put(klass, new Integer(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
@@ -84,16 +84,4 @@ public final class Recorder {
     }
 
 
-}
-
-// Used instead of java.lang.Integer to avoid stack overflow when the
-// agent uses the instrumented wrapper class.
-class Int {
-    private int value;
-    public Int(int value) {
-        this.value = value;
-    }
-    public int intValue() {
-        return value;
-    }
 }
