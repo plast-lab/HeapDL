@@ -53,6 +53,11 @@ public class Transformer implements ClassFileTransformer {
 
         byte[] ret = writer.toByteArray();
         if (debug) {
+            // Save bytecode.
+            debugWriteClass(className, ret);
+            debugWriteClass(className + ".orig", classFile);
+
+            // Check bytecode using ASM's CheckClassAdapter.
             ClassReader debugReader = new ClassReader(ret);
             ClassWriter debugWriter = new ClassWriter(reader,
                                                       ClassWriter.COMPUTE_MAXS |
@@ -60,24 +65,28 @@ public class Transformer implements ClassFileTransformer {
             try {
                 debugReader.accept(new CheckClassAdapter(debugWriter), 0);
             } catch (RuntimeException ex) {
+                System.err.println("Bytecode check failed for " + className + ":");
                 ex.printStackTrace();
                 System.exit(-1);
             }
 
-            // Save bytecode.
-            try {
-                String outDir = "out";
-                (new java.io.File(outDir)).mkdir();
-                OutputStream out = new FileOutputStream(outDir + "/" + className.replace("/", "_") + ".class");
-                out.write(ret);
-                out.flush();
-                out.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
         }
 
         return ret;
+    }
+
+    private void debugWriteClass(String className, byte[] bytecode) {
+        try {
+            String outDir = "out";
+            (new java.io.File(outDir)).mkdir();
+            OutputStream out = new FileOutputStream(outDir + "/" + className.replace("/", "_") + ".class");
+            out.write(bytecode);
+            out.flush();
+            out.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     /*
