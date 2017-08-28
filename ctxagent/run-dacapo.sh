@@ -24,7 +24,6 @@ then
     # for b in eclipse tradebeans
     do
         bench ${b}
-        exit
     done
 else
     bench ${1}
