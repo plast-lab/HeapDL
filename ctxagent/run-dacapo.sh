@@ -11,8 +11,8 @@
 JAVA=java
 
 AGENT=${HOME}/doop-nexgen/HeapDL/ctxagent/build/libs/ctxagent-1.0-SNAPSHOT.jar
-# CG=cg
-CG=
+CG=cg
+# CG=
 
 for b in avrora batik h2 jython luindex lusearch pmd sunflow xalan
 # for b in eclipse tradebeans
