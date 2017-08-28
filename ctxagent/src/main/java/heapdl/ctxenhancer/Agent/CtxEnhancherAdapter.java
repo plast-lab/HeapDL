@@ -2,17 +2,23 @@ package heapdl.ctxenhancer.Agent;
 
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static heapdl.ctxenhancer.Agent.Transformer.debugMessage;
 
 public class CtxEnhancherAdapter extends ClassVisitor {
     private String className;
     private boolean optInstrumentCGE;
+    private ClassLoader loader;
 
-    public CtxEnhancherAdapter(ClassWriter cw, String className, boolean optInstrumentCGE) {
+    public CtxEnhancherAdapter(ClassWriter cw, String className, boolean optInstrumentCGE, ClassLoader loader) {
         super(Opcodes.ASM5, cw);
         this.className = className;
         this.optInstrumentCGE = optInstrumentCGE;
+        this.loader = loader;
     }
 
     public MethodVisitor visitMethod(int access,
@@ -27,6 +33,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             debugMessage("Ignoring native method: " + name + " in " + className);
             return defaultVisitor;
         }
+        if (!canTransformClass(className, loader)) {
+            debugMessage("Ignoring class " + className);
+            return defaultVisitor;
+        }
 
         // Non-static, non-abstract methods can be subject to
         // call-graph edge instrumentation.
@@ -35,6 +45,41 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         boolean instrCGE   = (!isStatic) && (!isAbstract) && optInstrumentCGE;
 
         return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, instrCGE, isStatic);
+    }
+
+    private static Map<ClassLoader, Set<String>> seenClasses = new ConcurrentHashMap<>();
+    private static boolean canTransformClass(String name, ClassLoader loader) {
+        synchronized (seenClasses) {
+            String nameDots = name.replace("/", ".");
+            System.err.println(nameDots);
+
+            // Get the loaded classes for this loader and check that the
+            // class has not already been transformed.
+            Set<String> classesForLoader = seenClasses.get(loader);
+            if (classesForLoader == null) {
+                classesForLoader = new HashSet<>();
+                seenClasses.put(loader, classesForLoader);
+            } else if (classesForLoader.contains(name)) {
+                debugMessage("Class has already been transformed, is no longer interesting: " + name);
+                return false;
+            }
+
+            if (nameDots.startsWith("javassist"))
+                return false;
+            if (nameDots.startsWith("Instrumentation"))
+                return false;
+            if (nameDots.startsWith("heapdl"))
+                return false;
+            if (nameDots.equals("java.lang.Integer"))
+                return false;
+            if (nameDots.equals("java.lang.String"))
+                return false;
+            // if (nameDots.equals("java.lang.StringBuilder"))
+            //     return false;
+            debugMessage("interesting class: " + nameDots + " [loader=" + loader + ']');
+            classesForLoader.add(nameDots);
+            return true;
+        }
     }
 
     static class MethodEntryAdapter extends AdviceAdapter {
@@ -77,24 +122,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "recordCall", "(Ljava/lang/Object;)V");
             }
-        }
-
-        private static boolean isInterestingClass(String name) {
-            String nameDots = name.replace("/", ".");
-            if (nameDots.startsWith("javassist"))
-                return false;
-            if (nameDots.startsWith("Instrumentation"))
-                return false;
-            if (nameDots.startsWith("heapdl"))
-                return false;
-            if (nameDots.equals("java.lang.Integer"))
-                return false;
-            if (nameDots.equals("java.lang.String"))
-                return false;
-            // if (nameDots.equals("java.lang.StringBuilder"))
-            //     return false;
-            debugMessage("interesting class: " + nameDots);
-            return true;
         }
 
         // Records the creation of new objects without changing the

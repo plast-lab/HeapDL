@@ -46,12 +46,12 @@ public class Transformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain pd, byte[] classFile) throws IllegalClassFormatException {
         if (isLibraryClass(className)) return null;
-        debugMessage("Transforming: " + className);
+        debugMessage("Transforming: " + className + " [loader=" + loader + ']');
 
         ClassReader reader = new ClassReader(classFile);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS |
                                                      ClassWriter.COMPUTE_FRAMES);
-        ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE);
+        ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE, loader);
         reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
 
         byte[] ret = writer.toByteArray();
