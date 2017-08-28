@@ -11,8 +11,8 @@ import org.objectweb.asm.util.CheckClassAdapter;
 public class Transformer implements ClassFileTransformer {
 
     // Debugging flags.
-    private static boolean debug = false;
-    private static boolean saveBytecode = false;
+    private final static boolean debug = false;
+    private final static boolean saveBytecode = false;
 
     private boolean optInstrumentCGE = true;
     public Transformer(boolean optInstrumentCGE, String benchmark) {
