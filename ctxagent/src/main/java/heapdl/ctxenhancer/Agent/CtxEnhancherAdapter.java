@@ -144,7 +144,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                     String desc,
                                     boolean itf) {
 
-            // TODO: currently we don't instrument constructor calls.
+            // TODO: currently we don't instrument constructor bodies.
             if (methName.equals("<init>")) {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
                 return;
