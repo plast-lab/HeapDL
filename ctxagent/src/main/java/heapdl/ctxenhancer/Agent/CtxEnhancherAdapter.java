@@ -165,6 +165,12 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         }
 
         @Override
+        public void visitEnd() {
+            debugMessage("End of " + methName);
+            super.visitEnd();
+        }
+
+        @Override
         public void visitMethodInsn(int opcode,
                                     String owner,
                                     String name,
