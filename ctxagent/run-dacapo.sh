@@ -18,5 +18,4 @@ for b in avrora batik h2 jython luindex lusearch pmd sunflow xalan
 # for b in eclipse tradebeans
 do
     time ${JAVA} -javaagent:${AGENT}=${CG},${b} -Xss10000m -cp ${AGENT}:${HOME}/doop-benchmarks/dacapo-bach/dacapo-9.12-bach.jar Harness ${b} -s default -t 1
-    exit
 done
