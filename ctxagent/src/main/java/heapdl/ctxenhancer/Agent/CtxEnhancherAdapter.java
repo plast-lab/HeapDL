@@ -176,12 +176,15 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                     String desc,
                                     boolean itf) {
 
+            // Ignore existing calls to the context agent.
+            if (owner.startsWith("heapdl/ctxenhancer")) {
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
+                return;
+            }
+
             // TODO: currently we don't instrument constructor bodies.
-            // TODO: merge()/mergeStatic() currently show up in
-            // instrumented classes, ignore them until the bug is
-            // fixed.
-            if (methName.equals("<init>") ||
-                name.equals("merge") || name.equals("mergeStatic")) {
+            if (methName.equals("<init>")) {
+                debugMessage("Ignoring call to " + owner + ":" + name + "() in body of " + className + "." + methName + "()");
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
                 return;
             }
