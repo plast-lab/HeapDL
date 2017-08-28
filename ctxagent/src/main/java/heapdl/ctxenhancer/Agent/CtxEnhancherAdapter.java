@@ -177,7 +177,11 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                     boolean itf) {
 
             // TODO: currently we don't instrument constructor bodies.
-            if (methName.equals("<init>")) {
+            // TODO: merge()/mergeStatic() currently show up in
+            // instrumented classes, ignore them until the bug is
+            // fixed.
+            if (methName.equals("<init>") ||
+                name.equals("merge") || name.equals("mergeStatic")) {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
                 return;
             }
@@ -185,8 +189,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             // Call "merge" before calling non-<init> methods. For
             // <init> methods, look further down in this method.
             if (!name.equals("<init>")) {
-                debugMessage("TODO: callMerge()");
-                // callMerge();
+                callMerge();
             }
 
             super.visitMethodInsn(opcode, owner, name, desc, itf);
