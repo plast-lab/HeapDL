@@ -108,10 +108,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                       "recordStatic",
                                       "(Ljava/lang/Object;)V");
             } else {
-                // TODO: record()-instrumentation currently ignores
-                // constructor bodies.
-                if (methName.equals("<init>"))
-                    return;
                 extraStack += 2;
                 super.visitInsn(Opcodes.DUP);
                 // Leaving out the following NOP creates a wrong D2I.
