@@ -51,7 +51,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
     private static boolean canTransformClass(String name, ClassLoader loader) {
         synchronized (seenClasses) {
             String nameDots = name.replace("/", ".");
-            System.err.println(nameDots);
 
             // Get the loaded classes for this loader and check that the
             // class has not already been transformed.
