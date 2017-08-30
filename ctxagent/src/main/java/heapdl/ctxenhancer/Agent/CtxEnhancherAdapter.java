@@ -211,20 +211,19 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
                 debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
 
-                // We assume that the NEW already did a DUP: since the
-                // invokespecial(<init>) consumes the duplicate value,
-                // there is still one left for us to use.
+                // We assume that the NEW already did a DUP (JVM spec
+                // 4.10.2.4): since invokespecial(<init>) consumes the
+                // extra value, there is still one left for us to use.
                 recordNewObj();
             }
 
             // When calling <init> methods, we cannot call "merge"
-            // before their call, as that will cause the bytecode
-            // verifier to fail. We thus merge after the call, losing
-            // only those calls to <init> that do not return (due to
-            // effects such as exceptions or exiting the program).
-            if (name.equals("<init>")) {
+            // before their call: it is illegal to touch "this" before
+            // initialization. We thus merge after the call, possibly
+            // losing calls to <init> that do not directly return (due
+            // to effects such as exceptions or exiting the program).
+            if (name.equals("<init>"))
                 callMerge();
-            }
         }
 
         @Override
