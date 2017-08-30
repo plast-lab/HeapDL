@@ -63,8 +63,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 return false;
             }
 
-            if (nameDots.startsWith("javassist"))
-                return false;
             if (nameDots.startsWith("Instrumentation"))
                 return false;
             if (nameDots.startsWith("heapdl"))
