@@ -204,6 +204,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // buggy and can corrupt code.
                 if (!lastNewType.equals(owner)) {
                     System.err.println("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
+                    System.exit(-1);
                 }
 
                 // Reset lastNewType.
