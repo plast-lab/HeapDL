@@ -182,11 +182,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 return;
             }
 
-            // Call "merge" before calling non-<init> methods. For
-            // <init> methods, look further down in this method.
-            if (!name.equals("<init>")) {
-                callMerge();
-            }
+            callMerge();
 
             super.visitMethodInsn(opcode, owner, name, desc, itf);
 
@@ -219,14 +215,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // extra value, there is still one left for us to use.
                 recordNewObj();
             }
-
-            // When calling <init> methods, we cannot call "merge"
-            // before their call: it is illegal to touch "this" before
-            // initialization. We thus merge after the call, possibly
-            // losing calls to <init> that do not directly return (due
-            // to effects such as exceptions or exiting the program).
-            if (name.equals("<init>"))
-                callMerge();
         }
 
         @Override
