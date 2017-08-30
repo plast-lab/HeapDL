@@ -12,11 +12,17 @@ public class Transformer implements ClassFileTransformer {
 
     // Debugging flags.
     private final static boolean debug = false;
-    private final static boolean saveBytecode = false;
+    private final static boolean saveBytecode = true;
+
+    private final String outDir = "out";
 
     private boolean optInstrumentCGE = true;
     public Transformer(boolean optInstrumentCGE, String benchmark) {
         this.optInstrumentCGE = optInstrumentCGE;
+        if (debug)
+            System.err.println("Context-Agent: debugging is on");
+        if (saveBytecode)
+            System.err.println("Context-Agent: transformed bytecode is saved under '" + outDir + "'");
     }
 
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException {
@@ -81,7 +87,6 @@ public class Transformer implements ClassFileTransformer {
 
     private void debugWriteClass(String className, byte[] bytecode) {
         try {
-            String outDir = "out";
             (new java.io.File(outDir)).mkdir();
             OutputStream out = new FileOutputStream(outDir + "/" + className.replace("/", "_") + ".class");
             out.write(bytecode);
