@@ -5,6 +5,7 @@ import org.objectweb.asm.commons.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static heapdl.ctxenhancer.Agent.Transformer.debugMessage;
@@ -88,8 +89,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         // instrumentation in this method. Currently unused (TODO).
         private int extraStack;
 
-        // Used in the two-step instrumentation of new().
-        private String lastNewType = null;
+        // Used in the two-step instrumentation of NEW.
+        private Stack<String> lastNewTypes;
 
         public MethodEntryAdapter(int access,
                                   String methName,
@@ -105,6 +106,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             this.instrCGE  = instrCGE;
             this.isStatic  = isStatic;
             this.extraStack = 0;
+            this.lastNewTypes = new Stack<>();
         }
 
         @Override
@@ -180,13 +182,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 return;
             }
 
-            // TODO: currently we don't instrument constructor bodies.
-            if (methName.equals("<init>")) {
-                debugMessage("Ignoring call to " + owner + ":" + name + "() in body of " + className + "." + methName + "()");
-                super.visitMethodInsn(opcode, owner, name, desc, itf);
-                return;
-            }
-
             // Call "merge" before calling non-<init> methods. For
             // <init> methods, look further down in this method.
             if (!name.equals("<init>")) {
@@ -195,20 +190,27 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
             super.visitMethodInsn(opcode, owner, name, desc, itf);
 
-            // If a call to <init> is found and a NEW instruction has
-            // not been consumed yet, and the types match, then
-            // instrument the initialized object.
-            if (name != null && name.equals("<init>") && lastNewType != null) {
+            // Instrument constructor calls.
+            if (name != null && name.equals("<init>")) {
 
-                // If the types don't match then our heuristic is
-                // buggy and can corrupt code.
+                // Sanity check: for instrumentation to work, we must
+                // have already seen a NEW instruction (unless we are
+                // already inside another <init>, in which case this
+                // can be a call to "super.<init>()").
+                if (lastNewTypes.empty() && (!methName.equals("<init>"))) {
+                    System.err.println("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
+                    System.exit(-1);
+                }
+
+                // Pop stack to show that one NEW was handled.
+                String lastNewType = lastNewTypes.pop();
+
+                // Sanity check: if the types don't match then our
+                // heuristic is buggy and can corrupt code.
                 if (!lastNewType.equals(owner)) {
                     System.err.println("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
                     System.exit(-1);
                 }
-
-                // Reset lastNewType.
-                lastNewType = null;
 
                 debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
 
@@ -231,7 +233,15 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         public void visitTypeInsn(int opcode, String type) {
             super.visitTypeInsn(opcode, type);
             if (opcode == Opcodes.NEW) {
-                lastNewType = type;
+                // Java's 'new T()' becomes a series of instructions
+                // 'new T; ...; T.<init>()' (JVM spec 4.10.2.4). We
+                // cannot put instrumentation after NEW, as it is
+                // illegal to access the reference it created until
+                // <init> runs. Thus, when 'NEW T' is seen, we push T
+                // to a stack. T will be popped when the constructor
+                // body is visited; then, we can access "this" and
+                // call instrumentation.
+                lastNewTypes.push(type);
             } else if (opcode == Opcodes.NEWARRAY) {
                 debugMessage("Instrumenting NEWARRAY " + type + " in method " + methName + ":" + desc);
                 recordNewObj();
