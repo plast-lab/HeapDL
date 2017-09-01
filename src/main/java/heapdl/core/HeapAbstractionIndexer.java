@@ -55,6 +55,8 @@ class HeapAbstractionIndexer {
 
     DynamicHeapObject getHeapRepresentation(JavaHeapObject obj, Context hctx) {
         JavaClass cls = obj.getClazz();
+        // always get the frame, even if unused, due to side-effects of 'getAllocationFrame'
+        StackFrame frame = getAllocationFrame(obj);
 
         if (MemoryAnalyser.EXTRACT_STRING_CONSTANTS && cls.isString() && obj.toString().length() < 50) {
             // Strings are treated differently throughout, important for reflection analysis
@@ -62,8 +64,6 @@ class HeapAbstractionIndexer {
             String strValue = value instanceof JavaValueArray?((JavaValueArray)value).valueString():UNKNOWN;
             return new DynamicStringHeapObject(strValue);
         }
-
-        StackFrame frame = getAllocationFrame(obj);
 
         Function<AllocationKey, DynamicHeapObject> heapObjectFromFrame = k -> {
             StackFrame f = k.getFrame();

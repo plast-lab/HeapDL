@@ -65,8 +65,11 @@ public class MemoryAnalyser {
                 JavaObject obj = (JavaObject) heap;
                 String baseHeap = heapAbstractionIndexer.getAllocationAbstraction(obj);
                 JavaClass clazz = obj.getClazz();
-                if (obj.getClazz().toString().startsWith("heapdl") ||
-                        obj.getClazz().toString().startsWith("javassist")) return;
+
+                final String objCls = obj.getClazz().toString();
+                if (objCls.startsWith("heapdl") ||
+                        objCls.startsWith("javassist") ||
+                        objCls.startsWith("java.lang.String")) return;
                 do {
                     for (JavaField field : clazz.getFields()) {
                         JavaThing fieldValue = obj.getField(field.getName());
