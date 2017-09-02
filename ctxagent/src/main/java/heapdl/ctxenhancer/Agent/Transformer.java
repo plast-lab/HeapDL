@@ -17,7 +17,7 @@ public class Transformer implements ClassFileTransformer {
     private final String outDir = "out";
 
     private boolean optInstrumentCGE = true;
-    public Transformer(boolean optInstrumentCGE, String benchmark) {
+    public Transformer(boolean optInstrumentCGE) {
         this.optInstrumentCGE = optInstrumentCGE;
         if (debug)
             System.err.println("Context-Agent: debugging is on");
@@ -28,21 +28,8 @@ public class Transformer implements ClassFileTransformer {
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException {
 
         boolean optCGE = (args != null) && args.contains("cg");
-
-        final String[] benchmarks = new String[] { "avrora", "batik", "eclipse", "h2", "jython", "luindex", "lusearch", "pmd", "sunflow", "tradebeans", "xalan" };
-        String benchmark = null;
-        for (String b : benchmarks) {
-            if (args != null && args.contains(b)) {
-                benchmark = b;
-                break;
-            }
-        }
-        if (benchmark == null) {
-            System.err.println("No suitable benchmark defined in agent options: " + args);
-            System.exit(-1);
-        } else {
-            inst.addTransformer(new Transformer(optCGE, benchmark));
-        }
+        Transformer t = new Transformer(optCGE);
+        inst.addTransformer(t);
     }
 
     private static boolean isLibraryClass(String name) {
