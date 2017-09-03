@@ -1,6 +1,8 @@
 package heapdl.core;
 
 import com.sun.tools.hat.internal.model.*;
+import heapdl.io.FactEncoders;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.Map;
@@ -61,7 +63,7 @@ class HeapAbstractionIndexer {
         if (MemoryAnalyser.EXTRACT_STRING_CONSTANTS && cls.isString() && obj.toString().length() < 50) {
             // Strings are treated differently throughout, important for reflection analysis
             JavaThing value = ((JavaObject)obj).getField("value");
-            String strValue = value instanceof JavaValueArray?((JavaValueArray)value).valueString():UNKNOWN;
+            String strValue = (value instanceof JavaValueArray) ? ((JavaValueArray)value).valueString():UNKNOWN;
             return new DynamicStringHeapObject(strValue);
         }
 
@@ -110,7 +112,9 @@ class HeapAbstractionIndexer {
         } else if (obj instanceof JavaObjectRef) {
             return "JavaObjectRef";
         } else if (obj instanceof JavaClass) {
-            return "<class " + ((JavaClass) obj).getName() + ">";
+            DynamicClassHeapObject cls = new DynamicClassHeapObject((JavaClass) obj);
+            addFact(cls);
+            return cls.getRepresentation();
         }
         throw new RuntimeException("Unknown: " + obj.getClass().toString());
     }

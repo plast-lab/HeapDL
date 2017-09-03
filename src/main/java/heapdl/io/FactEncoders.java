@@ -1,5 +1,7 @@
 package heapdl.io;
 
+import com.sun.tools.hat.internal.model.JavaClass;
+
 /**
  * Created by neville on 15/02/2017.
  */
@@ -11,5 +13,9 @@ public class FactEncoders {
         else
             raw = "<<\"" + constant + "\">>";
         return raw;
+    }
+
+    public static String encodeClass(JavaClass obj) {
+        return "<class " + obj.getName() + ">";
     }
 }

@@ -1,5 +1,6 @@
 package heapdl.core;
 
+import com.sun.tools.hat.internal.model.JavaClass;
 import heapdl.io.Database;
 import heapdl.io.FactEncoders;
 
@@ -8,12 +9,11 @@ import static heapdl.io.PredicateFile.*;
 /**
  * Created by neville on 15/02/2017.
  */
-public class DynamicStringHeapObject implements DynamicHeapObject {
+public class DynamicClassHeapObject implements DynamicHeapObject {
     private final String representation;
 
-    public DynamicStringHeapObject(String stringValue) {
-        stringValue = stringValue.replace("\n", "").replace("\t", "").replace("\r", "");
-        this.representation = FactEncoders.encodeStringConstant(stringValue);
+    public DynamicClassHeapObject(JavaClass className) {
+        this.representation = FactEncoders.encodeClass(className);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class DynamicStringHeapObject implements DynamicHeapObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        DynamicStringHeapObject that = (DynamicStringHeapObject) o;
+        DynamicClassHeapObject that = (DynamicClassHeapObject) o;
 
         return getRepresentation().equals(that.getRepresentation());
     }
@@ -46,15 +46,8 @@ public class DynamicStringHeapObject implements DynamicHeapObject {
     }
 
     @Override
-    public boolean isProbablyUnmatched() {
-        return false;
-    }
-
-    @Override
     public void write_fact(Database db) {
-        db.add(DYNAMIC_NORMAL_HEAP_ALLOCATION,"", "", "java.lang.String", representation);
+        db.add(DYNAMIC_NORMAL_HEAP_ALLOCATION,"", "", "java.lang.Class", representation);
         db.add(DYNAMIC_NORMAL_HEAP_OBJECT,representation, ContextInsensitive.get().getRepresentation(), representation);
-        db.add(STRING_RAW, representation, representation);
-        db.add(STRING_CONST, representation);
     }
 }
