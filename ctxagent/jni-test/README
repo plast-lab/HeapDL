@@ -1,0 +1,5 @@
+JNI test for use with the instrumentation agent.
+
+Build with       : make
+Run with         : java HelloJNI
+Instrumented run : ../run-with-agent.sh HelloJNI
