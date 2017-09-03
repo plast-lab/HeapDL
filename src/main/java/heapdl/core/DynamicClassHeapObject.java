@@ -47,7 +47,7 @@ public class DynamicClassHeapObject implements DynamicHeapObject {
 
     @Override
     public void write_fact(Database db) {
-        db.add(DYNAMIC_NORMAL_HEAP_ALLOCATION,"", "", "java.lang.Class", representation);
+        db.add(DYNAMIC_NORMAL_HEAP_ALLOCATION,"0", "", "java.lang.Class", representation);
         db.add(DYNAMIC_NORMAL_HEAP_OBJECT,representation, ContextInsensitive.get().getRepresentation(), representation);
     }
 }
