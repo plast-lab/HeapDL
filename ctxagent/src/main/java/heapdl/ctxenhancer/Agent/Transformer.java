@@ -22,7 +22,7 @@ public class Transformer implements ClassFileTransformer {
         if (debug)
             System.err.println("Context-Agent: debugging is on");
         if (saveBytecode)
-            System.err.println("Context-Agent: transformed bytecode is saved under '" + outDir + "'");
+            System.err.println("Context-Agent: transformed bytecode is saved under \"" + outDir + "\"");
     }
 
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException {
