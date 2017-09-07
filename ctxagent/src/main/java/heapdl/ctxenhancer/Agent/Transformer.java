@@ -14,6 +14,7 @@ public class Transformer implements ClassFileTransformer {
     private final static boolean debug = false;
     private final static boolean saveBytecode = true;
 
+    private static final String CTXT_AGENT = "Context-Agent: ";
     private final String outDir = "out";
 
     private boolean optInstrumentCGE = true;
@@ -49,7 +50,13 @@ public class Transformer implements ClassFileTransformer {
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS |
                                                      ClassWriter.COMPUTE_FRAMES);
         ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE, loader);
-        reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
+        try {
+            reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
+        } catch (Exception ex) {
+            System.err.println(CTXT_AGENT);
+            ex.printStackTrace();
+            System.exit(-1);
+        }
 
         byte[] ret = writer.toByteArray();
 
@@ -91,7 +98,7 @@ public class Transformer implements ClassFileTransformer {
 
     public static void debugMessage(String msg) {
         if (debug) {
-            System.err.println("Context-Agent: " + msg);
+            System.err.println(CTXT_AGENT + msg);
             System.err.flush();
         }
     }
