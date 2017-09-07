@@ -41,6 +41,10 @@ public class Transformer implements ClassFileTransformer {
         if (isLibraryClass(className)) return null;
         debugMessage("Transforming: " + className + " [loader=" + loader + ']');
 
+        // Save original bytecode.
+        if (saveBytecode)
+            debugWriteClass(className + ".orig", classFile);
+
         ClassReader reader = new ClassReader(classFile);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS |
                                                      ClassWriter.COMPUTE_FRAMES);
@@ -48,11 +52,11 @@ public class Transformer implements ClassFileTransformer {
         reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
 
         byte[] ret = writer.toByteArray();
-        if (debug || saveBytecode) {
-            // Save bytecode.
+
+        // Save transformed bytecode.
+        if (saveBytecode)
             debugWriteClass(className, ret);
-            debugWriteClass(className + ".orig", classFile);
-        }
+
         if (debug) {
             // Check bytecode using ASM's CheckClassAdapter.
             ClassReader debugReader = new ClassReader(ret);
