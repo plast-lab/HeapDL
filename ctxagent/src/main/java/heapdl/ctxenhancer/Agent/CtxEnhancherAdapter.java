@@ -193,27 +193,33 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // have already seen a NEW instruction (unless we are
                 // already inside another <init>, in which case this
                 // can be a call to "super.<init>()").
-                if (lastNewTypes.empty() && (!methName.equals("<init>"))) {
-                    System.err.println("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
-                    System.exit(-1);
+                if (lastNewTypes.empty()) {
+                    if (!methName.equals("<init>")) {
+                        System.err.println("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
+                        System.exit(-1);
+                    } else {
+                        // If a call to super.<init>() is found,
+                        // ignore it: we already have a more specific
+                        // type for the current object.
+                    }
+                } else {
+                    // Pop stack to show that one NEW was handled.
+                    String lastNewType = lastNewTypes.pop();
+
+                    // Sanity check: if the types don't match then our
+                    // heuristic is buggy and can corrupt code.
+                    if (!lastNewType.equals(owner)) {
+                        System.err.println("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
+                        System.exit(-1);
+                    }
+
+                    debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
+
+                    // We assume that the NEW already did a DUP (JVM spec
+                    // 4.10.2.4): since invokespecial(<init>) consumes the
+                    // extra value, there is still one left for us to use.
+                    recordNewObj();
                 }
-
-                // Pop stack to show that one NEW was handled.
-                String lastNewType = lastNewTypes.pop();
-
-                // Sanity check: if the types don't match then our
-                // heuristic is buggy and can corrupt code.
-                if (!lastNewType.equals(owner)) {
-                    System.err.println("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
-                    System.exit(-1);
-                }
-
-                debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
-
-                // We assume that the NEW already did a DUP (JVM spec
-                // 4.10.2.4): since invokespecial(<init>) consumes the
-                // extra value, there is still one left for us to use.
-                recordNewObj();
             }
         }
 
