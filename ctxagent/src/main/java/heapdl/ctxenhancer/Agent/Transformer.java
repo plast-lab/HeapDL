@@ -14,7 +14,7 @@ public class Transformer implements ClassFileTransformer {
     private final static boolean debug = false;
     private final static boolean saveBytecode = true;
 
-    private static final String CTXT_AGENT = "Context-Agent: ";
+    public static final String CTXT_AGENT = "Context-Agent: ";
     private final String outDir = "out";
 
     private boolean optInstrumentCGE = true;

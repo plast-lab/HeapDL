@@ -182,13 +182,13 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 return;
             }
 
-            callMerge();
-
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            if (name == null) {
+                System.err.println(Transformer.CTXT_AGENT + "null name in visitMethodInsn()");
+                System.exit(-1);
+            }
 
             // Instrument constructor calls.
-            if (name != null && name.equals("<init>")) {
-
+            if (name.equals("<init>")) {
                 // Sanity check: for instrumentation to work, we must
                 // have already seen a NEW instruction (unless we are
                 // already inside another <init>, in which case this
