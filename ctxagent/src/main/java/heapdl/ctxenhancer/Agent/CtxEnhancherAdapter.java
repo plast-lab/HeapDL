@@ -260,7 +260,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             if (name == null)
                 Transformer.stopWithError("null name in visitMethodInsn()");
 
-            // instrNum++;
+            instrNum++;
             boolean callsInit = name.equals("<init>");
             debugMessage("Checking " + instrNum + ", callsInit = " + callsInit + ", name = " + name);
             instr1_isINVOKE_INIT = (instrNum == 1) && (opcode == INVOKESPECIAL) && callsInit;
