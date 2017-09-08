@@ -18,6 +18,7 @@ task fatjar(type: Jar) {
                 'Agent-Class': 'heapdl.ctxenhancer.Agent.Transformer',
                 'Premain-Class': 'heapdl.ctxenhancer.Agent.Transformer',
                 'Boot-Class-Path': 'ctxagent-'+ version + '.jar' + ":   ",
+                'Can-Set-Native-Method-Prefix': 'true',
                 'Can-Retransform-Classes': 'true'
 
     }

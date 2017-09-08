@@ -31,6 +31,11 @@ public class Transformer implements ClassFileTransformer {
         boolean optCGE = (args != null) && args.contains("cg");
         Transformer t = new Transformer(optCGE);
         inst.addTransformer(t);
+        if (inst.isNativeMethodPrefixSupported()) {
+            String nativePrefix = "Recorder$record$";
+            debugMessage("Using native prefix: \"" + nativePrefix + "\"");
+            inst.setNativeMethodPrefix(t, nativePrefix);
+        }
     }
 
     private static boolean isLibraryClass(String name) {
