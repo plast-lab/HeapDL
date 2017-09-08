@@ -156,6 +156,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         }
 
         private void callMerge() {
+            debugMessage("merging in " + (isStatic ? "static" : "instance") +
+                         " method " + methName);
             if (isStatic) {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
