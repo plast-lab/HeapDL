@@ -22,6 +22,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         this.loader = loader;
     }
 
+    @Override
     public MethodVisitor visitMethod(int access,
                                      String name,
                                      String desc,
