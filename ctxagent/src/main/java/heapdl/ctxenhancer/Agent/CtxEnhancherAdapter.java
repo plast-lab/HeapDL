@@ -92,6 +92,13 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         // Used in the two-step instrumentation of NEW.
         private Stack<String> lastNewTypes;
 
+        // Instruction index (first, second, ...). Not bytecode index.
+        private int instrNum = -1;
+        // Flags used to detect the two-instruction prefix "ALOAD0 ;
+        // INVOKESPECIAL<init>" in constructor bodies.
+        private boolean instr0_isALOAD0 = false;
+        private boolean instr1_isINVOKE_INIT = false;
+
         public MethodEntryAdapter(int access,
                                   String methName,
                                   String desc,
@@ -165,8 +172,63 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
         @Override
         public void visitEnd() {
-            debugMessage("End of " + methName);
+            debugMessage("End of " + className + "." + methName +
+                         ", instrNum = " + instrNum +
+                         ", instr0_isALOAD0 = " + instr0_isALOAD0 +
+                         ", instr1_isINVOKE_INIT = " + instr1_isINVOKE_INIT);
             super.visitEnd();
+        }
+
+        @Override
+        public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+            instrNum++;
+            super.visitFieldInsn(opcode, owner, name, desc);
+        }
+        @Override
+        public void visitIincInsn(int var, int increment) {
+            instrNum++;
+            super.visitIincInsn(var, increment);
+        }
+        @Override
+        public void visitInsn(int opcode) {
+            instrNum++;
+            super.visitInsn(opcode);
+        }
+        @Override
+        public void visitIntInsn(int opcode, int operand) {
+            instrNum++;
+            super.visitIntInsn(opcode, operand);
+        }
+        @Override
+        public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
+            instrNum++;
+            super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
+        }
+        @Override
+        public void visitJumpInsn(int opcode, Label label) {
+            instrNum++;
+            super.visitJumpInsn(opcode, label);
+        }
+        @Override
+        public void visitLdcInsn(Object cst) {
+            instrNum++;
+            super.visitLdcInsn(cst);
+        }
+        @Override
+        public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+            instrNum++;
+            super.visitLookupSwitchInsn(dflt, keys, labels);
+        }
+        @Override
+        public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+            instrNum++;
+            super.visitTableSwitchInsn(min, max, dflt, labels);
+        }
+        @Override
+        public void visitVarInsn(int opcode, int var) {
+            instrNum++;
+            instr0_isALOAD0 = (instrNum == 0) && (opcode == ALOAD) && (var == 0);
+            super.visitVarInsn(opcode, var);
         }
 
         @Override
@@ -185,8 +247,16 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             if (name == null)
                 Transformer.stopWithError("null name in visitMethodInsn()");
 
+            // instrNum++;
+            boolean callsInit = name.equals("<init>");
+            debugMessage("Checking " + instrNum + ", callsInit = " + callsInit + ", name = " + name);
+            instr1_isINVOKE_INIT = (instrNum == 1) && (opcode == INVOKESPECIAL) && callsInit;
+
+            // callMerge();
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+
             // Instrument constructor calls.
-            if (name.equals("<init>")) {
+            if (callsInit) {
                 // Sanity check: for instrumentation to work, we must
                 // have already seen a NEW instruction (unless we are
                 // already inside another <init>, in which case this
@@ -200,6 +270,13 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                         // type for the current object.
                     }
                 } else {
+                    // Instrument invocations in constructor methods.
+                    if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
+                        Transformer.stopWithError("TODO: super.<init>()");
+                    } else {
+                        Transformer.stopWithError("TODO: obj.<init>() inside <init>");
+                    }
+
                     // Pop stack to show that one NEW was handled.
                     String lastNewType = lastNewTypes.pop();
 
@@ -220,6 +297,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
         @Override
         public void visitTypeInsn(int opcode, String type) {
+            instrNum++;
             super.visitTypeInsn(opcode, type);
             if (opcode == Opcodes.NEW) {
                 // Java's 'new T()' becomes a series of instructions
@@ -239,6 +317,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
         @Override
         public void visitMultiANewArrayInsn(String desc, int dims) {
+            instrNum++;
             super.visitMultiANewArrayInsn(desc, dims);
             debugMessage("Instrumenting ANEWARRAY " + desc + "/" + dims + " in method " + methName + ":" + desc);
             recordNewObj();
