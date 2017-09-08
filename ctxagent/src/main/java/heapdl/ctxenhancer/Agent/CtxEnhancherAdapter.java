@@ -119,7 +119,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 super.visitVarInsn(Opcodes.ALOAD, 0);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
-                                      "recordCall", "(Ljava/lang/Object;)V");
+                                      "recordCall", "(Ljava/lang/Object;)V", false);
             }
         }
 
@@ -132,7 +132,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "recordStatic",
-                                      "(Ljava/lang/Object;)V");
+                                      "(Ljava/lang/Object;)V", false);
             } else {
                 extraStack += 2;
                 super.visitInsn(Opcodes.DUP);
@@ -143,7 +143,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "record",
-                                      "(Ljava/lang/Object;Ljava/lang/Object;)V");
+                                      "(Ljava/lang/Object;Ljava/lang/Object;)V", false);
             }
         }
 
@@ -152,14 +152,14 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "mergeStatic",
-                                      "()V");
+                                      "()V", false);
             } else {
                 extraStack += 1;
                 super.visitVarInsn(Opcodes.ALOAD, 0);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "merge",
-                                      "(Ljava/lang/Object;)V");
+                                      "(Ljava/lang/Object;)V", false);
             }
         }
 

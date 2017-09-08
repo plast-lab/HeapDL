@@ -26,6 +26,13 @@ task fatjar(type: Jar) {
     with jar
 }
 
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
