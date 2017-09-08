@@ -265,47 +265,66 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             debugMessage("Checking " + instrNum + ", callsInit = " + callsInit + ", name = " + name);
             instr1_isINVOKE_INIT = (instrNum == 1) && (opcode == INVOKESPECIAL) && callsInit;
 
-            // callMerge();
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
-
             // Instrument constructor calls.
             if (callsInit) {
-                // Sanity check: for instrumentation to work, we must
-                // have already seen a NEW instruction (unless we are
-                // already inside another <init>, in which case this
-                // can be a call to "super.<init>()").
-                if (lastNewTypes.empty()) {
-                    if (!methName.equals("<init>")) {
-                        Transformer.stopWithError("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
-                    } else {
-                        // If a call to super.<init>() is found,
-                        // ignore it: we already have a more specific
-                        // type for the current object.
-                    }
+                // Custom handling of super.<init>().
+                if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
+                    if (!methName.equals("<init>"))
+                        Transformer.stopWithError("Heuristic failed: found ALOAD0-init prefix in non <init> method.");
+                    else
+                        Transformer.stopWithError("TODO: handle merge() for super.<init>()");
+                    // Don't merge before super.<init>().
+                    // super.visitMethodInsn(opcode, owner, name, desc, itf);
                 } else {
-                    // Instrument invocations in constructor methods.
-                    if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
-                        Transformer.stopWithError("TODO: super.<init>()");
-                    } else {
-                        Transformer.stopWithError("TODO: obj.<init>() inside <init>");
-                    }
-
-                    // Pop stack to show that one NEW was handled.
-                    String lastNewType = lastNewTypes.pop();
-
-                    // Sanity check: if the types don't match then our
-                    // heuristic is buggy and can corrupt code.
-                    if (!lastNewType.equals(owner))
-                        Transformer.stopWithError("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
-
-                    debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
-
-                    // We assume that the NEW already did a DUP (JVM spec
-                    // 4.10.2.4): since invokespecial(<init>) consumes the
-                    // extra value, there is still one left for us to use.
-                    recordNewObj();
+                    // callMerge();
+                    super.visitMethodInsn(opcode, owner, name, desc, itf);
                 }
+            } else {
+                // Instrument non-constructor calls.
+                callMerge();
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
             }
+
+            // // Record new objects.
+            // // recordNewObjInMethod(owner, desc);
+
+            // // Sanity check: for instrumentation to work, we must
+            // // have already seen a NEW instruction (unless we are
+            // // already inside another <init>, in which case this
+            // // can be a call to "super.<init>()").
+            // if (lastNewTypes.empty()) {
+            //     if (!methName.equals("<init>")) {
+            //         Transformer.stopWithError("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + getMethName() + desc);
+            //     } else {
+            //         // If a call to super.<init>() is found,
+            //         // ignore it: we already have a more specific
+            //         // type for the current object.
+            //     }
+            // } else {
+            //     // Instrument invocations in constructor methods.
+            //     if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
+            //         Transformer.stopWithError("TODO: super.<init>()");
+            //     } else {
+            //         Transformer.stopWithError("TODO: obj.<init>() inside <init>");
+            //     }
+            // }
+        }
+
+        void recordNewObjInMethod(String owner, String desc) {
+            // Pop stack to show that one NEW was handled.
+            String lastNewType = lastNewTypes.pop();
+
+            // Sanity check: if the types don't match then our
+            // heuristic is buggy and can corrupt code.
+            if (!lastNewType.equals(owner))
+                Transformer.stopWithError("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
+
+            debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
+
+            // We assume that the NEW already did a DUP (JVM spec
+            // 4.10.2.4): since invokespecial(<init>) consumes the
+            // extra value, there is still one left for us to use.
+            recordNewObj();
         }
 
         @Override
