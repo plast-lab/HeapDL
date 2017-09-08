@@ -102,4 +102,8 @@ public class Transformer implements ClassFileTransformer {
             System.err.flush();
         }
     }
+    public static void stopWithError(String msg) {
+        System.err.println(CTXT_AGENT + msg);
+        System.exit(-1);
+    }
 }

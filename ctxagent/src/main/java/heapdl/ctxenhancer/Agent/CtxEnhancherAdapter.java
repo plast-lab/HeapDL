@@ -182,10 +182,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 return;
             }
 
-            if (name == null) {
-                System.err.println(Transformer.CTXT_AGENT + "null name in visitMethodInsn()");
-                System.exit(-1);
-            }
+            if (name == null)
+                Transformer.stopWithError("null name in visitMethodInsn()");
 
             // Instrument constructor calls.
             if (name.equals("<init>")) {
@@ -195,8 +193,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // can be a call to "super.<init>()").
                 if (lastNewTypes.empty()) {
                     if (!methName.equals("<init>")) {
-                        System.err.println("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
-                        System.exit(-1);
+                        Transformer.stopWithError("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + className + "." + methName + desc);
                     } else {
                         // If a call to super.<init>() is found,
                         // ignore it: we already have a more specific
@@ -208,10 +205,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
                     // Sanity check: if the types don't match then our
                     // heuristic is buggy and can corrupt code.
-                    if (!lastNewType.equals(owner)) {
-                        System.err.println("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
-                        System.exit(-1);
-                    }
+                    if (!lastNewType.equals(owner))
+                        Transformer.stopWithError("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
 
                     debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
 
