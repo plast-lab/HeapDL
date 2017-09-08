@@ -57,8 +57,8 @@ public class Transformer implements ClassFileTransformer {
         ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE, loader);
         try {
             reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
-        } catch (Exception ex) {
-            System.err.println(CTXT_AGENT);
+        } catch (RuntimeException ex) {
+            System.err.println(CTXT_AGENT + "ASM error visiting class " + className);
             ex.printStackTrace();
             System.exit(-1);
         }
