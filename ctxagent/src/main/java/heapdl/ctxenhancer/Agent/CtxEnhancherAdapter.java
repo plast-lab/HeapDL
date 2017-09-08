@@ -158,6 +158,12 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         private void callMerge() {
             debugMessage("merging in " + (isStatic ? "static" : "instance") +
                          " method " + methName);
+            if (methName.equals("<init>")) {
+                // TODO: we should be able to merge() inside
+                // constructors too, but we have to do it after the
+                // super.<init>().
+                Transformer.stopWithError("Cannot merge inside constructors yet.");
+            }
             if (isStatic) {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
