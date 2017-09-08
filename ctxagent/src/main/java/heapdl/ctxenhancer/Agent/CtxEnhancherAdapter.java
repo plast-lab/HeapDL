@@ -173,7 +173,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
         @Override
         public void visitEnd() {
-            debugMessage("End of " + className + "." + methName +
+            debugMessage("End of " + getMethName() +
                          ", instrNum = " + instrNum +
                          ", instr0_isALOAD0 = " + instr0_isALOAD0 +
                          ", instr1_isINVOKE_INIT = " + instr1_isINVOKE_INIT);
@@ -230,6 +230,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             instrNum++;
             instr0_isALOAD0 = (instrNum == 0) && (opcode == ALOAD) && (var == 0);
             super.visitVarInsn(opcode, var);
+        }
+
+        private String getMethName() {
+            return className.replace("/", ".") + "." + methName + "()";
         }
 
         @Override
