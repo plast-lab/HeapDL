@@ -52,8 +52,8 @@ public class Transformer implements ClassFileTransformer {
             debugWriteClass(className + ".orig", classFile);
 
         ClassReader reader = new ClassReader(classFile);
-        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS |
-                                                     ClassWriter.COMPUTE_FRAMES);
+        int wFlags = ClassWriter.COMPUTE_MAXS; // | ClassWriter.COMPUTE_FRAMES;
+        ClassWriter writer = new ContextClassWriter(loader, reader, wFlags);
         ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE, loader);
         try {
             reader.accept(ctxAdapter, ClassReader.EXPAND_FRAMES);
@@ -72,9 +72,7 @@ public class Transformer implements ClassFileTransformer {
         if (debug) {
             // Check bytecode using ASM's CheckClassAdapter.
             ClassReader debugReader = new ClassReader(ret);
-            ClassWriter debugWriter = new ClassWriter(reader,
-                                                      ClassWriter.COMPUTE_MAXS |
-                                                      ClassWriter.COMPUTE_FRAMES);
+            ClassWriter debugWriter = new ContextClassWriter(loader, reader, wFlags);
             try {
                 debugReader.accept(new CheckClassAdapter(debugWriter), 0);
             } catch (RuntimeException ex) {
