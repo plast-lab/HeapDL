@@ -54,7 +54,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             debugMessage("Ignoring class " + className);
             return defaultVisitor;
         }
-        debugMessage("Visiting method: " + name + desc);
+        debugMessage("Visiting method: " + className + "." + name + desc);
 
         // Non-static, non-abstract methods can be subject to
         // call-graph edge instrumentation.
