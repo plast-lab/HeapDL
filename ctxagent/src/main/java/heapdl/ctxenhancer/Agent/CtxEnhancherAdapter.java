@@ -54,6 +54,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             debugMessage("Ignoring class " + className);
             return defaultVisitor;
         }
+        debugMessage("Visiting method: " + name + desc);
 
         // Non-static, non-abstract methods can be subject to
         // call-graph edge instrumentation.
@@ -261,7 +262,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         }
 
         private String getMethName() {
-            return className.replace("/", ".") + "." + methName + "()";
+            return className.replace("/", ".") + "." + methName + desc;
         }
 
         @Override
