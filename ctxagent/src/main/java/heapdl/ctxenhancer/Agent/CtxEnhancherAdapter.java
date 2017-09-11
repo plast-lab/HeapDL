@@ -1,12 +1,14 @@
 package heapdl.ctxenhancer.Agent;
 
-import org.objectweb.asm.*;
-import org.objectweb.asm.commons.*;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import org.objectweb.asm.*;
+import org.objectweb.asm.commons.*;
 
 import static heapdl.ctxenhancer.Agent.Transformer.debugMessage;
 
@@ -14,6 +16,19 @@ public class CtxEnhancherAdapter extends ClassVisitor {
     private String className;
     private boolean optInstrumentCGE;
     private ClassLoader loader;
+
+    private static Map<ClassLoader, Set<String>> seenClasses = new ConcurrentHashMap<>();
+
+    // Dummy class loader object representing the "null" system class loader.
+    private static ClassLoader nullLoader;
+    static {
+        try {
+            nullLoader = new URLClassLoader(new URL[] { new URL("http://dummy") });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(-1);
+        }
+    }
 
     public CtxEnhancherAdapter(ClassWriter cw, String className, boolean optInstrumentCGE, ClassLoader loader) {
         super(Opcodes.ASM5, cw);
@@ -49,11 +64,13 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, instrCGE, isStatic);
     }
 
-    private static Map<ClassLoader, Set<String>> seenClasses = new ConcurrentHashMap<>();
     private static boolean canTransformClass(String name, ClassLoader loader) {
         synchronized (seenClasses) {
             String nameDots = name.replace("/", ".");
 
+            // Use a dummy object for the bootstrap loader.
+            if (loader == null)
+                loader = nullLoader;
             // Get the loaded classes for this loader and check that the
             // class has not already been transformed.
             Set<String> classesForLoader = seenClasses.get(loader);
