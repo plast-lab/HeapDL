@@ -61,7 +61,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         boolean isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
         boolean instrCGE   = (!isStatic) && (!isAbstract) && optInstrumentCGE;
 
-        return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, instrCGE, isStatic);
+        return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, instrCGE, isStatic, loader);
     }
 
     private static boolean canTransformClass(String name, ClassLoader loader) {
@@ -102,6 +102,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         private String className, methName, desc;
         private boolean instrCGE;
         private boolean isStatic;
+        private ClassLoader loader;
 
         // Computes the extra stack requirements for the
         // instrumentation in this method. Currently unused (TODO).
@@ -123,15 +124,17 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                   MethodVisitor mv,
                                   String className,
                                   boolean instrCGE,
-                                  boolean isStatic) {
+                                  boolean isStatic,
+                                  ClassLoader loader) {
             super(Opcodes.ASM5, mv, access, methName, desc);
-            this.className = className;
-            this.methName  = methName;
-            this.desc      = desc;
-            this.instrCGE  = instrCGE;
-            this.isStatic  = isStatic;
-            this.extraStack = 0;
+            this.className    = className;
+            this.methName     = methName;
+            this.desc         = desc;
+            this.instrCGE     = instrCGE;
+            this.isStatic     = isStatic;
+            this.extraStack   = 0;
             this.lastNewTypes = new Stack<>();
+            this.loader       = loader;
         }
 
         @Override
@@ -328,6 +331,9 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         }
 
         void recordNewObjInMethod(String owner, String desc) {
+            if (!canTransformClass(owner, loader))
+                return;
+
             // Pop stack to show that one NEW was handled.
             String lastNewType = lastNewTypes.pop();
 
