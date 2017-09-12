@@ -337,6 +337,9 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
             // Pop stack to show that one NEW was handled.
             String lastNewType = lastNewTypes.pop();
+            debugMessage("Popping type: " + lastNewType +
+                         ", peek = " +
+                         (lastNewTypes.empty()? "NOTHING" : lastNewTypes.peek()));
 
             // Sanity check: if the types don't match then our
             // heuristic is buggy and can corrupt code.
@@ -364,7 +367,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // to a stack. T will be popped when the constructor
                 // body is visited; then, we can access "this" and
                 // call instrumentation.
-                lastNewTypes.push(type);
+                debugMessage("Pushing new type: " + type +
+                             ", empty? " + lastNewTypes.empty());
+                if (canTransformClass(type, loader))
+                    lastNewTypes.push(type);
             } else if (opcode == Opcodes.NEWARRAY) {
                 debugMessage("Instrumenting NEWARRAY " + type + " in method " + methName + ":" + desc);
                 recordNewObj();
