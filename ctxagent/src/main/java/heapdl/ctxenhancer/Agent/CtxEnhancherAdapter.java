@@ -100,9 +100,12 @@ public class CtxEnhancherAdapter extends ClassVisitor {
     }
 
     static class MethodEntryAdapter extends AdviceAdapter {
+        private static final boolean DONT_MERGE_FOR_INIT = true;
+
         private String className, methName, desc;
         private boolean instrCGE;
         private boolean isStatic;
+        private boolean isInit;
         private ClassLoader loader;
 
         // Computes the extra stack requirements for the
@@ -132,19 +135,25 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             this.extraStack   = 0;
             this.lastNewTypes = new Stack<>();
             this.loader       = loader;
+            this.isInit       = methName.equals("<init>");
         }
 
         @Override
         protected void onMethodEnter() {
+            // If CGE is enabled, start method with recordCall().
             if (instrCGE) {
-                debugMessage("Insert recordCall() invocation in " + className + ":" + methName + ":" + methodDesc + "...");
+                if (DONT_MERGE_FOR_INIT && isInit) {
+                    debugMessage("Ignoring recordCall() for " + getMethName());
+                } else {
+                    debugMessage("Insert recordCall() invocation in " + className + ":" + methName + ":" + methodDesc + "...");
 
-                // Call heapdl.ctxenhancer.Recorder.Recorder.recordCall(),
-                // using "this" as its argument.
-                super.visitVarInsn(Opcodes.ALOAD, 0);
-                super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                                      "heapdl/ctxenhancer/Recorder/Recorder",
-                                      "recordCall", "(Ljava/lang/Object;)V", false);
+                    // Call heapdl.ctxenhancer.Recorder.Recorder.recordCall(),
+                    // using "this" as its argument.
+                    super.visitVarInsn(Opcodes.ALOAD, 0);
+                    super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                          "heapdl/ctxenhancer/Recorder/Recorder",
+                                          "recordCall", "(Ljava/lang/Object;)V", false);
+                }
             }
         }
 
@@ -175,7 +184,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         private void callMerge() {
             debugMessage("merging in " + (isStatic ? "static" : "instance") +
                          " method " + methName);
-            if (methName.equals("<init>")) {
+            if (isInit) {
                 // TODO: we should be able to merge() inside
                 // constructors too, but we have to do it after the
                 // this/super.<init>().
@@ -278,27 +287,20 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
             instrNum++;
             boolean callsInit = name.equals("<init>");
-            boolean inInit = methName.equals("<init>");
 
-            // Instrument method invocations to call merge().
-            if (callsInit) {
-                if (inInit) {
-                    // TODO: handle obj.<init>() or possible
-                    // this/super.<init>().
-                } else {
-                    // TODO: handle obj.<init>().
-                }
-                super.visitMethodInsn(opcode, owner, name, desc, itf);
-            } else {
-                // Instrument normal invocations.
+            // Instrument non-constructor invocations to call merge().
+            if (!callsInit && DONT_MERGE_FOR_INIT) {
+                debugMessage("Ignoring merge() for " + getMethName());
                 callMerge();
-                super.visitMethodInsn(opcode, owner, name, desc, itf);
             }
+
+            // Generate the original invocation instruction.
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
 
             // Instrument constructor invocations to call record()
             // after 'new T' objects have been initialized.
             if (callsInit) {
-                if (inInit) {
+                if (isInit) {
                     // TODO: don't ignore allocations inside constructors.
                 } else if (lastNewTypes.empty()) {
                     // Sanity check: for instrumentation to work, we must have
