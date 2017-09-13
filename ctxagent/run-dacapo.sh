@@ -16,7 +16,7 @@ CG=cg
 
 function bench {
     echo "DaCapo benchmark: ${1}"
-    time ${JAVA} -javaagent:${AGENT}=${CG},${1} -Xss10000m -cp ${AGENT}:${HOME}/doop-benchmarks/dacapo-bach/dacapo-9.12-bach.jar Harness ${1} -s default -t 1
+    time ${JAVA} -javaagent:${AGENT}=${CG} -Xss10000m -cp ${AGENT}:${HOME}/doop-benchmarks/dacapo-bach/dacapo-9.12-bach.jar Harness ${1} -s default -t 1
 }
 
 if [ -z "$1" ]
