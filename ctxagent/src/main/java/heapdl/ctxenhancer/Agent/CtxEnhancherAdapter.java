@@ -110,10 +110,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         private boolean isInit;
         private ClassLoader loader;
 
-        // Computes the extra stack requirements for the
-        // instrumentation in this method. Currently unused (TODO).
-        private int extraStack;
-
         // Used in the two-step instrumentation of NEW.
         private Stack<String> lastNewTypes;
 
@@ -134,7 +130,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             this.desc         = desc;
             this.instrCGE     = instrCGE;
             this.isStatic     = isStatic;
-            this.extraStack   = 0;
             this.lastNewTypes = new Stack<>();
             this.loader       = loader;
             this.isInit       = methName.equals("<init>");
@@ -163,14 +158,12 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         // stack size needed for the current method.
         private void recordNewObj() {
             if (isStatic) {
-                extraStack += 1;
                 super.visitInsn(Opcodes.DUP);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
                                       "recordStatic",
                                       "(Ljava/lang/Object;)V", false);
             } else {
-                extraStack += 2;
                 super.visitInsn(Opcodes.DUP);
                 // Leaving out the following NOP creates a wrong D2I.
                 super.visitInsn(Opcodes.NOP);
@@ -192,7 +185,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                       "mergeStatic",
                                       "()V", false);
             } else {
-                extraStack += 1;
                 super.visitVarInsn(Opcodes.ALOAD, 0);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
                                       "heapdl/ctxenhancer/Recorder/Recorder",
@@ -294,9 +286,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             // Instrument constructor invocations to call record()
             // after 'new T' objects have been initialized.
             if (callsInit) {
-                if (isInit) {
-                    // TODO: don't ignore allocations inside constructors.
-                } else if (lastNewTypes.empty()) {
+                if (lastNewTypes.empty()) {
                     // Sanity check: for instrumentation to work, we must have
                     // already seen a NEW instruction (unless we are already
                     // inside another <init>, in which case this can be a call
