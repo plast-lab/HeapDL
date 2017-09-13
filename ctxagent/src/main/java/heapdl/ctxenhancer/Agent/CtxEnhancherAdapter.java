@@ -44,6 +44,8 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                                      String signature,
                                      String[] exceptions) {
         MethodVisitor defaultVisitor = super.visitMethod(access, name, desc, signature, exceptions);
+        if (defaultVisitor == null)
+            stopWithError("NULL default method visitor");
 
         // Native methods are ignored.
         if ((access & Opcodes.ACC_NATIVE) != 0) {
