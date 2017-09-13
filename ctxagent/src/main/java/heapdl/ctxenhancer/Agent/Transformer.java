@@ -58,7 +58,7 @@ public class Transformer implements ClassFileTransformer {
         try {
             ClassNode cn = new ClassNode(Opcodes.ASM5);
             reader.accept(cn, ClassReader.EXPAND_FRAMES);
-            cn.accept(writer);
+            cn.accept(ctxAdapter);
         } catch (RuntimeException ex) {
             System.err.println(CTXT_AGENT + "ASM error visiting class " + className);
             ex.printStackTrace();
