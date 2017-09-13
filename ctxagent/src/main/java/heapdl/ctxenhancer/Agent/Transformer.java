@@ -27,7 +27,6 @@ public class Transformer implements ClassFileTransformer {
     }
 
     public static synchronized void premain(String args, Instrumentation inst) throws ClassNotFoundException, IOException {
-
         boolean optCGE = (args != null) && args.contains("cg");
         Transformer t = new Transformer(optCGE);
         inst.addTransformer(t);
