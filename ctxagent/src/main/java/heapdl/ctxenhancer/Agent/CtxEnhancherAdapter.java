@@ -363,8 +363,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 if (canTransformClass(type, loader))
                     lastNewTypes.push(type);
             } else if (opcode == Opcodes.NEWARRAY) {
-                debugMessage("Instrumenting NEWARRAY " + type + " in method " + methName + ":" + desc);
-                recordNewObj();
+                if (canTransformClass(type, loader)) {
+                    debugMessage("Instrumenting NEWARRAY " + type + " in method " + methName + ":" + desc);
+                    recordNewObj();
+                }
             }
         }
 
@@ -372,8 +374,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         public void visitMultiANewArrayInsn(String desc, int dims) {
             instrNum++;
             super.visitMultiANewArrayInsn(desc, dims);
-            debugMessage("Instrumenting ANEWARRAY " + desc + "/" + dims + " in method " + methName + ":" + desc);
-            recordNewObj();
+            if (canTransformClass(desc, loader)) {
+                debugMessage("Instrumenting ANEWARRAY " + desc + "/" + dims + " in method " + methName + ":" + desc);
+                recordNewObj();
+            }
         }
     }
 }
