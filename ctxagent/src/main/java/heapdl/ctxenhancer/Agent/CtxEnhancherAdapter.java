@@ -16,6 +16,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
     private String className;
     private boolean optInstrumentCGE;
     private ClassLoader loader;
+    private String superName;
 
     private static Map<ClassLoader, Set<String>> seenClasses = new ConcurrentHashMap<>();
 
@@ -35,6 +36,14 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         this.className = className;
         this.optInstrumentCGE = optInstrumentCGE;
         this.loader = loader;
+    }
+
+    // Remember the superclass. This information is used by method
+    // visitors to find this()/super() inside constructors.
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        this.superName = superName;
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -64,7 +73,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         boolean isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
         boolean instrCGE   = (!isStatic) && (!isAbstract) && optInstrumentCGE;
 
-        return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, instrCGE, isStatic, loader);
+        return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, superName, instrCGE, isStatic, loader);
     }
 
     private static boolean canTransformClass(String name, ClassLoader loader) {
@@ -104,10 +113,11 @@ public class CtxEnhancherAdapter extends ClassVisitor {
     static class MethodEntryAdapter extends AdviceAdapter {
         private static final boolean DONT_MERGE_FOR_INIT = true;
 
-        private String className, methName, desc;
+        private String className, superName, methName, desc;
         private boolean instrCGE;
         private boolean isStatic;
         private boolean isInit;
+        private boolean pendingInit;
         private ClassLoader loader;
 
         // Used in the two-step instrumentation of NEW.
@@ -116,23 +126,22 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         // Instruction index (first, second, ...). Not bytecode index.
         private int instrNum = -1;
 
-        public MethodEntryAdapter(int access,
-                                  String methName,
-                                  String desc,
-                                  MethodVisitor mv,
-                                  String className,
-                                  boolean instrCGE,
-                                  boolean isStatic,
-                                  ClassLoader loader) {
+        public MethodEntryAdapter(int access, String methName, String desc,
+                                  MethodVisitor mv, String className,
+                                  String superName, boolean instrCGE,
+                                  boolean isStatic, ClassLoader loader) {
             super(Opcodes.ASM5, mv, access, methName, desc);
             this.className    = className;
+            this.superName    = superName;
             this.methName     = methName;
             this.desc         = desc;
             this.instrCGE     = instrCGE;
             this.isStatic     = isStatic;
             this.lastNewTypes = new Stack<>();
             this.loader       = loader;
-            this.isInit       = methName.equals("<init>");
+            boolean isInit0   = methName.equals("<init>");
+            this.isInit       = isInit0;
+            this.pendingInit  = isInit0;
         }
 
         @Override
@@ -274,9 +283,15 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             instrNum++;
             boolean callsInit = name.equals("<init>");
 
-            // Instrument non-constructor invocations to call merge().
-            if (!callsInit && DONT_MERGE_FOR_INIT) {
+            // We don't instrument constructor calls.
+            if (callsInit && DONT_MERGE_FOR_INIT) {
                 debugMessage("Ignoring merge() for " + getMethName());
+            }
+            // We instrument invocations by prepending merge():
+            // (a) everywhere in non-constructor methods and
+            // (b) for invocations after this()/super() in
+            // constructors (before that, we cannot access "this").
+            else if (!isInit || !pendingInit) {
                 callMerge();
             }
 
@@ -297,6 +312,16 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                     // Record new objects after their <init> is called.
                     recordNewObjAfterInitCall(owner);
                 }
+            }
+
+            // If this invocation was this() or super(), set flag that
+            // merge(this) can now be called.
+            if (pendingInit) {
+                pendingInit = !(callsInit &&
+                                (owner.equals(className) ||
+                                 owner.equals(superName)));
+                if (!pendingInit)
+                    debugMessage("Found this()/super() in " + getMethName() + ", instr#" + instrNum);
             }
         }
 
