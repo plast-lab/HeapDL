@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.*;
 
-import static heapdl.ctxenhancer.Agent.Transformer.debugMessage;
+import static heapdl.ctxenhancer.Agent.Transformer.*;
 
 public class CtxEnhancherAdapter extends ClassVisitor {
     private String className;
@@ -188,7 +188,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
                 // TODO: we should be able to merge() inside
                 // constructors too, but we have to do it after the
                 // this/super.<init>().
-                // Transformer.stopWithError("Cannot merge inside constructors yet.");
+                // stopWithError("Cannot merge inside constructors yet.");
                 debugMessage("Cannot merge inside constructors yet.");
                 return;
             }
@@ -283,7 +283,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             }
 
             if (name == null)
-                Transformer.stopWithError("null name in visitMethodInsn()");
+                stopWithError("null name in visitMethodInsn()");
 
             instrNum++;
             boolean callsInit = name.equals("<init>");
@@ -331,11 +331,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             // Sanity check: if the types don't match then our
             // heuristic is buggy and can corrupt code.
             if (!lastNewType.equals(newType))
-                Transformer.stopWithError("Heuristic failed: lastNewType = "
-                                          + lastNewType +
-                                          ", newType = " + newType +
-                                          ", method = " + getMethName() +
-                                          ", instr#" + instrNum);
+                stopWithError("Heuristic failed: lastNewType = " + lastNewType +
+                              ", newType = " + newType +
+                              ", method = " + getMethName() +
+                              ", instr#" + instrNum);
 
             debugMessage("Instrumenting NEW/<init> for type " + newType + " in method " + methName);
 
