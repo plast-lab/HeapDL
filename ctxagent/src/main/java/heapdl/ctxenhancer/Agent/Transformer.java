@@ -52,6 +52,8 @@ public class Transformer implements ClassFileTransformer {
             debugWriteClass(className + ".orig", classFile);
 
         ClassReader reader = new ClassReader(classFile);
+        // If using COMPUTE_FRAMES, also enable the JSRInlinerAdapter
+        // in CtxEnhancherAdapter.
         int wFlags = ClassWriter.COMPUTE_MAXS; // | ClassWriter.COMPUTE_FRAMES;
         ClassWriter writer = new ContextClassWriter(loader, wFlags);
         ClassVisitor ctxAdapter = new CtxEnhancherAdapter(writer, className, optInstrumentCGE, loader);

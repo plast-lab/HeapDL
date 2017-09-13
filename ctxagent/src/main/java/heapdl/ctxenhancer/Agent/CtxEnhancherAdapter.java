@@ -74,6 +74,12 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         boolean instrCGE   = (!isStatic) && (!isAbstract) && optInstrumentCGE;
 
         return new MethodEntryAdapter(access, name, desc, defaultVisitor, className, superName, instrCGE, isStatic, loader);
+
+        // Uncomment the following lines if using COMPUTE_FRAMES.
+        // JSRInlinerAdapter jAdapter = new JSRInlinerAdapter(defaultVisitor,
+        //                                                    access, name, desc,
+        //                                                    signature, exceptions);
+        // return new MethodEntryAdapter(access, name, desc, jAdapter, className, superName, instrCGE, isStatic, loader);
     }
 
     private static boolean canTransformClass(String name, ClassLoader loader) {
