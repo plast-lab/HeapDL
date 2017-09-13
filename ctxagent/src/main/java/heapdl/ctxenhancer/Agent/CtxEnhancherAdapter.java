@@ -114,10 +114,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
         // Instruction index (first, second, ...). Not bytecode index.
         private int instrNum = -1;
-        // Flags used to detect the two-instruction prefix "ALOAD0 ;
-        // INVOKESPECIAL<init>" in constructor bodies.
-        private boolean instr0_isALOAD0 = false;
-        private boolean instr1_isINVOKE_INIT = false;
 
         public MethodEntryAdapter(int access,
                                   String methName,
@@ -182,8 +178,10 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             if (methName.equals("<init>")) {
                 // TODO: we should be able to merge() inside
                 // constructors too, but we have to do it after the
-                // super.<init>().
-                Transformer.stopWithError("Cannot merge inside constructors yet.");
+                // this/super.<init>().
+                // Transformer.stopWithError("Cannot merge inside constructors yet.");
+                debugMessage("Cannot merge inside constructors yet.");
+                return;
             }
             if (isStatic) {
                 super.visitMethodInsn(Opcodes.INVOKESTATIC,
@@ -203,9 +201,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         @Override
         public void visitEnd() {
             debugMessage("End of " + getMethName() +
-                         ", instrNum = " + instrNum +
-                         ", instr0_isALOAD0 = " + instr0_isALOAD0 +
-                         ", instr1_isINVOKE_INIT = " + instr1_isINVOKE_INIT);
+                         ", instrNum = " + instrNum);
             super.visitEnd();
         }
 
@@ -257,7 +253,6 @@ public class CtxEnhancherAdapter extends ClassVisitor {
         @Override
         public void visitVarInsn(int opcode, int var) {
             instrNum++;
-            instr0_isALOAD0 = (instrNum == 0) && (opcode == ALOAD) && (var == 0);
             super.visitVarInsn(opcode, var);
         }
 
@@ -283,57 +278,47 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
             instrNum++;
             boolean callsInit = name.equals("<init>");
-            debugMessage("Checking " + instrNum + ", callsInit = " + callsInit + ", name = " + name);
-            instr1_isINVOKE_INIT = (instrNum == 1) && (opcode == INVOKESPECIAL) && callsInit;
+            boolean inInit = methName.equals("<init>");
 
-            // Instrument constructor calls.
+            // Instrument method invocations to call merge().
             if (callsInit) {
-                // Custom handling of super.<init>().
-                if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
-                    if (!methName.equals("<init>"))
-                        Transformer.stopWithError("Heuristic failed: found ALOAD0-init prefix in non <init> method.");
-                    else
-                        Transformer.stopWithError("TODO: handle merge() for super.<init>()");
-                    // Don't merge before super.<init>().
-                    // super.visitMethodInsn(opcode, owner, name, desc, itf);
+                if (inInit) {
+                    // TODO: handle obj.<init>() or possible
+                    // this/super.<init>().
                 } else {
-                    // callMerge();
-                    super.visitMethodInsn(opcode, owner, name, desc, itf);
+                    // TODO: handle obj.<init>().
                 }
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
             } else {
-                // Instrument non-constructor calls.
+                // Instrument normal invocations.
                 callMerge();
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
             }
 
-            // // Record new objects.
-            // // recordNewObjInMethod(owner, desc);
-
-            // // Sanity check: for instrumentation to work, we must
-            // // have already seen a NEW instruction (unless we are
-            // // already inside another <init>, in which case this
-            // // can be a call to "super.<init>()").
-            // if (lastNewTypes.empty()) {
-            //     if (!methName.equals("<init>")) {
-            //         Transformer.stopWithError("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + getMethName() + desc);
-            //     } else {
-            //         // If a call to super.<init>() is found,
-            //         // ignore it: we already have a more specific
-            //         // type for the current object.
-            //     }
-            // } else {
-            //     // Instrument invocations in constructor methods.
-            //     if (instr0_isALOAD0 && instr1_isINVOKE_INIT) {
-            //         Transformer.stopWithError("TODO: super.<init>()");
-            //     } else {
-            //         Transformer.stopWithError("TODO: obj.<init>() inside <init>");
-            //     }
-            // }
+            // Instrument constructor invocations to call record()
+            // after 'new T' objects have been initialized.
+            if (callsInit) {
+                if (inInit) {
+                    // TODO: don't ignore allocations inside constructors.
+                } else if (lastNewTypes.empty()) {
+                    // Sanity check: for instrumentation to work, we must have
+                    // already seen a NEW instruction (unless we are already
+                    // inside another <init>, in which case this can be a call
+                    // to "super.<init>()" or another constructor of the
+                    // current class).
+                    debugMessage("No 'new " + owner + "()' found before constructor call: " + owner + "() in " + getMethName());
+                } else {
+                    // Record new objects after their <init> is called.
+                    recordNewObjAfterInitCall(owner);
+                }
+            }
         }
 
-        void recordNewObjInMethod(String owner, String desc) {
-            if (!canTransformClass(owner, loader))
+        void recordNewObjAfterInitCall(String newType) {
+            if (!canTransformClass(newType, loader))
                 return;
+
+            debugMessage("Recording " + newType + " object @ instr#" + instrNum);
 
             // Pop stack to show that one NEW was handled.
             String lastNewType = lastNewTypes.pop();
@@ -343,10 +328,14 @@ public class CtxEnhancherAdapter extends ClassVisitor {
 
             // Sanity check: if the types don't match then our
             // heuristic is buggy and can corrupt code.
-            if (!lastNewType.equals(owner))
-                Transformer.stopWithError("Heuristic failed: lastNewType = " + lastNewType + ", owner = " + owner);
+            if (!lastNewType.equals(newType))
+                Transformer.stopWithError("Heuristic failed: lastNewType = "
+                                          + lastNewType +
+                                          ", newType = " + newType +
+                                          ", method = " + getMethName() +
+                                          ", instr#" + instrNum);
 
-            debugMessage("Instrumenting NEW/<init> for type " + owner + " in method " + methName + ":" + desc);
+            debugMessage("Instrumenting NEW/<init> for type " + newType + " in method " + methName);
 
             // We assume that the NEW already did a DUP (JVM spec
             // 4.10.2.4): since invokespecial(<init>) consumes the
