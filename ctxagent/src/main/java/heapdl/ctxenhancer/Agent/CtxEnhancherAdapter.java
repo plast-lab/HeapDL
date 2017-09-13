@@ -307,7 +307,9 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             // Instrument constructor invocations to call record()
             // after 'new T' objects have been initialized.
             if (callsInit) {
-                if (lastNewTypes.empty()) {
+                if (isInit && pendingInit) {
+                    // Ignore allocations before super()/this().
+                } else if (lastNewTypes.empty()) {
                     // Sanity check: for instrumentation to work, we must have
                     // already seen a NEW instruction (unless we are already
                     // inside another <init>, in which case this can be a call
