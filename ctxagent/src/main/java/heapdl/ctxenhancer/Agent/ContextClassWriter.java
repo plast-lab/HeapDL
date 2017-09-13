@@ -12,8 +12,8 @@ import org.objectweb.asm.*;
 public class ContextClassWriter extends ClassWriter {
     private ClassLoader loader;
 
-    public ContextClassWriter(ClassLoader l, ClassReader classReader, int flags) {
-        super(classReader, flags);
+    public ContextClassWriter(ClassLoader l, int flags) {
+        super(flags);
         this.loader = l;
     }
 
