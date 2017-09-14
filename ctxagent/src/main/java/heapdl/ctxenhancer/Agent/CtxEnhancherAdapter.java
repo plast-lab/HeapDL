@@ -169,8 +169,7 @@ public class CtxEnhancherAdapter extends ClassVisitor {
             }
         }
 
-        // Records the creation of new objects without changing the
-        // stack size needed for the current method.
+        // Records the creation of new objects.
         private void recordNewObj() {
             if (isStatic) {
                 super.visitInsn(Opcodes.DUP);
