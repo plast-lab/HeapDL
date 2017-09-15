@@ -16,8 +16,8 @@ import static heapdl.core.DumpParsingUtil.fullyQualifiedMethodSignatureFromFrame
  */
 public class HeapAbstractionIndexer2ObjH extends HeapAbstractionIndexer {
 
-    public static final String HCTX_RECORDER_CLASS_NAME = "Instrumentation.Recorder.Recorder$ObjectAndContext";
-    public static final String EDGE_CTXS_RECORDER_CLASS_NAME = "Instrumentation.Recorder.Recorder$EdgeContexts";
+    public static final String HCTX_RECORDER_CLASS_NAME = "heapdl.ctxenhancer.Recorder.Recorder$ObjectAndContext";
+    public static final String EDGE_CTXS_RECORDER_CLASS_NAME = "heapdl.ctxenhancer.Recorder.Recorder$EdgeContexts";
 
     public static final Map<Long,DynamicHeapObject> dynamicHeapObjectCache = new ConcurrentHashMap<>(0x1000);
 
