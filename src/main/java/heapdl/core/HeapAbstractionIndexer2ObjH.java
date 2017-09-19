@@ -118,13 +118,13 @@ public class HeapAbstractionIndexer2ObjH extends HeapAbstractionIndexer {
     }
 
     private Context getContextFromDumpObject(JavaHeapObject ctx) {
-        DynamicHeapObject heapAbstraction = heapIndex.getOrDefault(ctx.getId(), null);
-        if (heapAbstraction == null) {
+        DynamicHeapObject heapObjectAbstraction = heapIndex.getOrDefault(ctx.getId(), null);
+        if (heapObjectAbstraction == null) {
             return getHContextFromDumpObject(ctx);
         } else {
             try {
-                return new DoubleContext<>(new ContextObj(heapAbstraction.getHeapRepresentation()),
-                        new ContextObj(heapAbstraction.getContextRepresentation()));
+                return new DoubleContext<>(new ContextObj(heapObjectAbstraction.getHeapRepresentation()),
+                        new ContextObj(heapObjectAbstraction.getContextRepresentation()));
 
             } catch (ClassCastException e) {
                 return ContextInsensitive.get();

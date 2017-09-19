@@ -1,5 +1,6 @@
 package heapdl.core;
 
+import com.sun.tools.hat.internal.model.StackFrame;
 import com.sun.tools.hat.internal.model.StackTrace;
 import heapdl.io.Database;
 import heapdl.io.PredicateFile;
@@ -18,7 +19,12 @@ public class DynamicReachableMethod implements DynamicFact {
     public static Collection<DynamicReachableMethod> fromStackTrace(StackTrace trace) {
         if (trace == null || trace.getFrames() == null)
             return new ArrayList<>();
-        return Arrays.stream(trace.getFrames()).map(
+        StackFrame[] frames = trace.getFrames();
+        for (int i = 1 ; i < frames.length; i ++) {
+            if (frames[i].getClassName().startsWith("heapdl"))
+                return new ArrayList<>();
+        }
+        return Arrays.stream(frames).map(
                 a -> new DynamicReachableMethod(DumpParsingUtil.fullyQualifiedMethodSignatureFromFrame(a))
         ).collect(Collectors.toList());
     }
