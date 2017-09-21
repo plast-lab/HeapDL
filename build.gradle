@@ -1,8 +1,11 @@
-group 'HeapDL'
-version '1.0-SNAPSHOT'
+plugins {
+	id 'java'
+	id 'maven'
+    id 'maven-publish'
+    //see https://github.com/researchgate/gradle-release
+    id 'net.researchgate.release' version '2.4.0'
+}
 
-apply plugin: 'java'
-apply plugin: 'maven'
 group = 'com.github.plast-lab'
 
 sourceCompatibility = 1.8
@@ -14,7 +17,6 @@ repositories {
     }
 }
 
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -24,4 +26,40 @@ dependencies {
     // https://mvnrepository.com/artifact/com.offbytwo/docopt
     compile group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
     compile(group: "sun", name: "jhat", version: "PATCHED")
+}
+
+if (project.hasProperty('artifactory_user')) {
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username artifactory_user
+                    password artifactory_password
+                }
+                url "$artifactory_contextUrl/libs-public-release-local"
+            }
+        }
+    }
+
+    release {
+        failOnSnapshotDependencies = false
+        failOnUnversionedFiles = false
+        failOnCommitNeeded = false
+
+        git {
+           commitVersionFileOnly = true
+        }
+        /* publish before releasing
+           buildTasks =['build', 'publish']
+         */
+    }
+
+    afterReleaseBuild.dependsOn publish
 }
