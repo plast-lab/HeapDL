@@ -12,3 +12,32 @@ repositories {
    }
 ````
 
+# Generating a heap snapshot for use with HeapDL
+
+## OpenJDK/IBM JDK
+
+To take a heap snapshot of a running program (`Program.jar`) on
+program exit, run:
+
+```
+java -agentlib:hprof=heap=dump,format=b,depth=8 -jar Program.jar
+```
+
+## Android
+
+To take a heap snapshot an Android app running on a device (or
+emulator) bridged by `adb`, run the following
+(`APP_PACKAGE`/`MAIN_ACTIVITY` are the names of the application
+package and the main app activity to launch respectively):
+
+```
+# Start app.
+adb shell am start --track-allocation $APP_PACKAGE/$MAIN_ACTIVITY
+
+# When ready, take heap snapshot.
+adb shell am dumpheap `adb shell ps | grep $APP_PACKAGE\$ | awk '{print $MAIN_ACTIVITY}'` /data/local/tmp/$APP_PACKAGE.android.hprof
+
+# Download and convert.
+adb pull /data/local/tmp/$APP_PACKAGE.android.hprof .
+hprof-conv $APP_PACKAGE.android.hprof $APP_PACKAGE.hprof
+```
