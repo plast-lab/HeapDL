@@ -1,6 +1,8 @@
 package heapdl.main;
 
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import heapdl.core.MemoryAnalyser;
 import org.docopt.Docopt;
@@ -32,6 +34,8 @@ public class Main {
                             .withVersion("HeapDL "+ (version == null ? "DEVELOPMENT" : version))
                             .parse(args);
 
-            MemoryAnalyser m = new MemoryAnalyser((String)opts.get("<hprof1>"), !((boolean) opts.get("--no-strings")));
+            List<String> hprofs = new ArrayList<String>();
+            hprofs.add((String)opts.get("<hprof1>"));
+            MemoryAnalyser m = new MemoryAnalyser(hprofs, !((boolean) opts.get("--no-strings")));
     }
 }

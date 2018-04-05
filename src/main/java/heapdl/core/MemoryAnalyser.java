@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,24 +21,20 @@ public class MemoryAnalyser {
 
     static boolean EXTRACT_STRING_CONSTANTS = false;
 
-    private static String filename;
+    private static List<String> filenames;
 
     private Set<DynamicFact> dynamicFacts = ConcurrentHashMap.newKeySet();
 
     private HeapAbstractionIndexer heapAbstractionIndexer = null;
 
-    public MemoryAnalyser(String filename, boolean uniqueStings) {
-
-        this.filename = filename;
+    public MemoryAnalyser(List<String> filenames, boolean uniqueStings) {
+        this.filenames = filenames;
         EXTRACT_STRING_CONSTANTS = uniqueStings;
         if (uniqueStings) System.out.println("(Experimental) Strings in Heap dump will be analyzed.");
     }
 
-
-
-    public void resolveFactsFromDump(String sensitivity) throws IOException, InterruptedException {
+    public void resolveFactsFromDump(String filename, String sensitivity) throws IOException, InterruptedException {
         Snapshot snapshot = DumpParsingUtil.getSnapshotFromFile(filename);
-
 
         try {
             Class<?> heapAbstractionIndexerClass = Class.forName(
@@ -98,11 +95,9 @@ public class MemoryAnalyser {
             }
         });
 
-
         dynamicFacts.addAll(dynamicStaticFieldPointsToSet);
         dynamicFacts.addAll(dynamicInstanceFieldPointsToSet);
         dynamicFacts.addAll(dynamicArrayIndexPointsToSet);
-
     }
 
     public int getAndOutputFactsToDB(File factDir, String sensitivity) throws IOException, InterruptedException {
@@ -110,7 +105,8 @@ public class MemoryAnalyser {
 
         try {
             long startTime = System.nanoTime();
-            resolveFactsFromDump(sensitivity);
+            for (String filename : filenames)
+                resolveFactsFromDump(filename, sensitivity);
             long endTime = System.nanoTime();
             long durationSeconds = (endTime - startTime) / 1000000000;
             System.out.println("Heap dump analysis time: " + durationSeconds);
@@ -132,8 +128,5 @@ public class MemoryAnalyser {
         db.close();
         return dynamicFacts.size();
     }
-
-
-
 
 }
