@@ -34,8 +34,8 @@ package and the main app activity to launch respectively):
 # Start app.
 adb shell am start --track-allocation $APP_PACKAGE/$MAIN_ACTIVITY
 
-# When ready, take heap snapshot.
-adb shell am dumpheap `adb shell ps | grep $APP_PACKAGE\$ | awk '{print $MAIN_ACTIVITY}'` /data/local/tmp/$APP_PACKAGE.android.hprof
+# When ready, take heap snapshot (we assume $2 is the PID field of ps).
+adb shell am dumpheap `adb shell ps | grep $APP_PACKAGE\$ | awk '{print $2}'` /data/local/tmp/$APP_PACKAGE.android.hprof
 
 # Download and convert.
 adb pull /data/local/tmp/$APP_PACKAGE.android.hprof .
