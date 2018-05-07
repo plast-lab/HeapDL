@@ -103,25 +103,26 @@ public class MemoryAnalyser {
     public int getAndOutputFactsToDB(File factDir, String sensitivity) throws IOException, InterruptedException {
         Database db = new Database(factDir, false);
 
-        try {
-            long startTime = System.nanoTime();
-            for (String filename : filenames)
+        for (String filename : filenames) {
+            try {
+                long startTime = System.nanoTime();
                 resolveFactsFromDump(filename, sensitivity);
-            long endTime = System.nanoTime();
-            long durationSeconds = (endTime - startTime) / 1000000000;
-            System.out.println("Heap dump analysis time: " + durationSeconds);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
+                long endTime = System.nanoTime();
+                long durationSeconds = (endTime - startTime) / 1000000000;
+                System.out.println("Heap dump analysis time: " + durationSeconds);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
 
-        Context.write_facts_once(db);
+            Context.write_facts_once(db);
 
-        for (DynamicFact fact: dynamicFacts) {
-            fact.write_fact(db);
-        }
+            for (DynamicFact fact: dynamicFacts) {
+                fact.write_fact(db);
+            }
 
-        for (DynamicFact fact: heapAbstractionIndexer.getDynamicFacts()) {
-            fact.write_fact(db);
+            for (DynamicFact fact: heapAbstractionIndexer.getDynamicFacts()) {
+                fact.write_fact(db);
+            }
         }
 
         db.flush();
