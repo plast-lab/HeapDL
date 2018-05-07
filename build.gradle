@@ -28,6 +28,16 @@ dependencies {
     compile(group: "sun", name: "jhat", version: "PATCHED")
 }
 
+task fatjar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'heapdl.main.Main',
+                   'Implementation-Version': version
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 if (project.hasProperty('artifactory_user')) {
 
     publishing {

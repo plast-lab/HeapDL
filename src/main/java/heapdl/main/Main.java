@@ -1,5 +1,6 @@
 package heapdl.main;
 
+import java.io.File;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +13,22 @@ import org.docopt.Docopt;
  */
 public class Main {
 
+    private static final String defaultSensitivity = "Insensitive";
+
     private static final String doc =
             "Heaps Don't Lie!\n"
                     + "\n"
                     + "Usage:\n"
-                    + "  heapdl <hprof1> [<hprof2>] [<hprof3>]\n"
+                    + "  heapdl <file> ...  --out=<dir> [--sensitivity=<sensitivity>] [--no-strings]\n"
                     + "  heapdl (-h | --help)\n"
                     + "  heapdl --version\n"
                     + "\n"
                     + "Options:\n"
                     + "  -h --help                    Show this screen.\n"
                     + "  --version                    Show version.\n"
-                    + "  --sensitivity=<sensitivity>  Context sensitivity (e.g. 2ObjH) [default: Insensitive].\n"
+                    + "  --sensitivity=<sensitivity>  Context sensitivity (2ObjH or Insensitive) [default: " + defaultSensitivity + "].\n"
                     + "  --no-strings                 Do not extract short string constants from heap dump.\n"
+                    + "  --out=<dir>                  Output directory.\n"
                     + "\n";
 
     public static void main(String[] args) {
@@ -34,8 +38,34 @@ public class Main {
                             .withVersion("HeapDL "+ (version == null ? "DEVELOPMENT" : version))
                             .parse(args);
 
-            List<String> hprofs = new ArrayList<String>();
-            hprofs.add((String)opts.get("<hprof1>"));
+            // Read command-line options.
+            List<String> hprofs = (List<String>)opts.get("<file>");
+            String sensitivity = (String)opts.get("--sensitivity");
+            if (sensitivity == null) {
+                sensitivity = defaultSensitivity;
+            }
+            System.out.println("Using sensitivity: " + sensitivity);
+            String factsDir = (String)opts.get("--out");
+            if (factsDir == null) {
+                System.err.println("Missing --out parameter for output directory.");
+                return;
+            }
+
+            File factsDirFile = new File(factsDir);
+            if (!factsDirFile.exists()) {
+                System.out.println("Creating output directory: " + factsDir);
+                factsDirFile.mkdirs();
+            } else {
+                System.out.println("Using existing output directory: " + factsDir);
+            }
+
+            // Generate facts from the HPROF inputs.
             MemoryAnalyser m = new MemoryAnalyser(hprofs, !((boolean) opts.get("--no-strings")));
+            try {
+                int n = m.getAndOutputFactsToDB(new File(factsDir), sensitivity);
+                System.out.println("Generated " + n + " facts.");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
     }
 }

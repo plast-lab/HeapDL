@@ -1,6 +1,12 @@
 # HeapDL
 Heaps Don't Lie!
 
+# Using HeapDL in standalone mode
+
+```$ ./gradlew fatjar
+$ java -jar build/libs/HeapDL-all-1.0.2.jar file.hprof --out output-dir
+```
+
 # Using HeapDL as a library
 ````
 repositories {
