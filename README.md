@@ -3,7 +3,8 @@ Heaps Don't Lie!
 
 # Using HeapDL in standalone mode
 
-```$ ./gradlew fatjar
+```
+$ ./gradlew fatjar
 $ java -jar build/libs/HeapDL-all-1.0.3.jar file.hprof --out output-dir
 ```
 
