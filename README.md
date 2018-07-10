@@ -1,5 +1,5 @@
 # HeapDL
-Heaps Don't Lie!
+Heaps Don't Lie!  Published in PACM PL OOPSLA (2017) ([pdf](http://www.nevillegrech.com/heapdl-oopsla17.pdf))
 
 # Using HeapDL in standalone mode
 
