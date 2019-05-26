@@ -6,7 +6,7 @@ HeapDL is integrated with the Doop pointer analysis framework, however it is als
 
 ```
 $ ./gradlew fatjar
-$ java -jar build/libs/HeapDL-all-1.0.3.jar file.hprof --out output-dir
+$ java -jar build/libs/HeapDL-all-1.1.0.jar file.hprof --out output-dir
 ```
 
 # Using HeapDL as a library
@@ -22,7 +22,7 @@ repositories {
 
 # Generating a heap snapshot for use with HeapDL
 
-## OpenJDK/IBM JDK
+## OpenJDK/IBM JDK (Java 8)
 
 To take a heap snapshot of a running program (`Program.jar`) on
 program exit, run:
@@ -30,6 +30,19 @@ program exit, run:
 ```
 java -agentlib:hprof=heap=dump,format=b,depth=8 -jar Program.jar
 ```
+
+## OpenJDK/IBM JDK (Java 11)
+
+To take a heap snapshot of a program (`Program.jar`) on
+program exit, first build the heapDump-agent and the 
+stackTraces-agent and then run:
+
+```
+java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -agentpath:stackTraces-agent/libStackTracesAgent.so -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -jar Program.jar
+```
+
+Use the --stackTraces argument to pass the stack traces file 
+to HeapDL.
 
 ## Android
 

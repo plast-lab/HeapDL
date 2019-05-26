@@ -21,19 +21,24 @@ public class MemoryAnalyser {
 
     private final List<String> filenames;
 
+    private final List<String> stackTracesFilenames;
+
     private Set<DynamicFact> dynamicFacts = ConcurrentHashMap.newKeySet();
 
     private HeapAbstractionIndexer heapAbstractionIndexer = null;
 
-    public MemoryAnalyser(List<String> filenames, boolean uniqueStings) {
+    private StackTraces stackTraces;
+
+    public MemoryAnalyser(List<String> filenames, List<String> stackTracesFilenames, boolean uniqueStings) {
         this.filenames = filenames;
         EXTRACT_STRING_CONSTANTS = uniqueStings;
         if (uniqueStings) System.out.println("(Experimental) Strings in Heap dump will be analyzed.");
+        this.stackTracesFilenames = stackTracesFilenames;
     }
 
     public void resolveFactsFromDump(String filename, String sensitivity) throws IOException, InterruptedException {
         Snapshot snapshot = new Snapshot();
-        HprofParser hprofParser = new HprofParser(new SnapshotHandler(snapshot, EXTRACT_STRING_CONSTANTS));
+        HprofParser hprofParser = new HprofParser(new SnapshotHandler(snapshot, stackTraces, EXTRACT_STRING_CONSTANTS));
         hprofParser.parse(new File(filename));
 
         /*
@@ -118,6 +123,11 @@ public class MemoryAnalyser {
 
     public int getAndOutputFactsToDB(File factDir, String sensitivity) throws IOException, InterruptedException {
         Database db = new Database(factDir, false);
+
+        stackTraces = new StackTraces();
+        for (String filename : stackTracesFilenames) {
+            stackTraces.addStackTraces(filename);
+        }
 
         for (String filename : filenames) {
             try {

@@ -18,10 +18,13 @@ public class SnapshotHandler extends NullRecordHandler {
     private final HashMap<Long, StackFrame> localStackFrames = new HashMap<>();
     private final HashMap<Integer, StackTrace> localStackTraces = new HashMap<>();
 
+    private final StackTraces externalStackTraces;
+
     private final boolean extractStringConstants;
 
-    public SnapshotHandler(Snapshot snapshot, boolean extractStringConstants) {
+    public SnapshotHandler(Snapshot snapshot, StackTraces stackTraces, boolean extractStringConstants) {
         this.snapshot = snapshot;
+        this.externalStackTraces = stackTraces;
         this.extractStringConstants = extractStringConstants;
     }
 
@@ -68,7 +71,7 @@ public class SnapshotHandler extends NullRecordHandler {
             javaFields.add(new JavaField(stringMap.get(s.staticFieldNameStringId), s.value.type.toString(), s.value.value.toString(), className.get(classObjId)));
         }
 
-        snapshot.addThing(classObjId, new JavaClass(classObjId, className.get(classObjId), javaFields, getStackTraces(stackTraceSerialNum)));
+        snapshot.addThing(classObjId, new JavaClass(classObjId, className.get(classObjId), javaFields, getStackTraces(stackTraceSerialNum, classObjId)));
 
         classMap.put(classObjId, new ClassInfo(classObjId, superClassObjId, instanceSize, instanceFields));
     }
@@ -93,13 +96,13 @@ public class SnapshotHandler extends NullRecordHandler {
             }
             assert i == instanceFieldValues.length;
         }
-        snapshot.addThing(objId, new JavaObject(objId, classObjId, className.get(classObjId), javaFields, getStackTraces(stackTraceSerialNum)));
+        snapshot.addThing(objId, new JavaObject(objId, classObjId, className.get(classObjId), javaFields, getStackTraces(stackTraceSerialNum, objId)));
     }
 
     @Override
     public void objArrayDump(long objId, int stackTraceSerialNum,
                              long elemClassObjId, long[] elems) {
-        snapshot.addThing(objId, new JavaObjectArray(objId, elemClassObjId, className.get(elemClassObjId), elems, getStackTraces(stackTraceSerialNum)));
+        snapshot.addThing(objId, new JavaObjectArray(objId, elemClassObjId, className.get(elemClassObjId), elems, getStackTraces(stackTraceSerialNum, objId)));
     }
 
     @Override
@@ -110,14 +113,17 @@ public class SnapshotHandler extends NullRecordHandler {
             for (int i = 0; i < elems.length; i++) {
                 elements[i] = (Byte) elems[i].value;
             }
-            snapshot.addThing(objId, new JavaValueArray(objId, objId, getBasicTypeArray(elemType), elements, getStackTraces(stackTraceSerialNum)));
+            snapshot.addThing(objId, new JavaValueArray(objId, objId, getBasicTypeArray(elemType), elements, getStackTraces(stackTraceSerialNum, objId)));
         } else {
-            snapshot.addThing(objId, new JavaValueArray(objId, objId, getBasicTypeArray(elemType), null, getStackTraces(stackTraceSerialNum)));
+            snapshot.addThing(objId, new JavaValueArray(objId, objId, getBasicTypeArray(elemType), null, getStackTraces(stackTraceSerialNum, objId)));
         }
     }
 
-    private StackTrace getStackTraces(int stackTraceSerialNum) {
-        return localStackTraces.get(stackTraceSerialNum);
+    private StackTrace getStackTraces(int stackTraceSerialNum, long objId) {
+        if (localStackTraces.containsKey(stackTraceSerialNum)) {
+            return localStackTraces.get(stackTraceSerialNum);
+        }
+        return externalStackTraces.getStackTrace(objId);
     }
 
     private static String getBasicType(byte type) {

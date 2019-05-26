@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 static char *filename = NULL;
-static char default_file[] = "stackFrames.csv";
+static char default_file[] = "stackTraces.csv";
 static int max_frame_count = 8;
 static int sampling = 512 * 1024;
 
