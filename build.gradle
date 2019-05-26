@@ -22,10 +22,12 @@ dependencies {
 
     compile "org.apache.ivy:ivy:2.3.0",
             "log4j:log4j:1.2.14",                              // Logging implementation
-            "commons-io:commons-io:2.4"                        // File Utils
+            "commons-io:commons-io:2.4",                       // File Utils
+            "com.google.guava:guava:27.1-jre"
     // https://mvnrepository.com/artifact/com.offbytwo/docopt
     compile group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
     compile(group: "sun", name: "jhat", version: "PATCHED")
+    compile "ext:hprof-parser:1.0-SNAPSHOT"
 }
 
 task fatjar(type: Jar) {
