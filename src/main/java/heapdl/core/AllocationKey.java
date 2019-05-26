@@ -1,7 +1,6 @@
 package heapdl.core;
 
-import com.sun.tools.hat.internal.model.JavaClass;
-import com.sun.tools.hat.internal.model.StackFrame;
+import heapdl.hprof.StackFrame;
 
 /**
  * Created by neville on 23/05/2017.
@@ -11,15 +10,15 @@ public class AllocationKey {
 
     private int hash = 0;
     private StackFrame thisFrame;
-    private JavaClass cls;
+    private long classId;
 
     public int hashCode() {
         return this.hash;
     }
 
-    public AllocationKey(StackFrame frame, JavaClass cls) {
+    public AllocationKey(StackFrame frame, long classId) {
         this.thisFrame = frame;
-        this.cls = cls;
+        this.classId = classId;
         if (frame == null) return;
         this.hash = frame.getClassName().hashCode();
         this.hash *= 31;
@@ -29,20 +28,20 @@ public class AllocationKey {
         this.hash *= 31;
         this.hash += frame.getLineNumber().hashCode();
         this.hash *= 31;
-        this.hash += cls.getId();
+        this.hash += classId;
     }
 
     public boolean equals(Object that) {
         if (!(that instanceof AllocationKey))
             return false;
-        StackFrame thatFrame  = ((AllocationKey) that).thisFrame;
+        StackFrame thatFrame = ((AllocationKey) that).thisFrame;
         if (thisFrame == thatFrame)
             return true;
         return thatFrame.getClassName().equals(thisFrame.getClassName()) &&
                 thatFrame.getMethodName().equals(thisFrame.getMethodName()) &&
                 thatFrame.getLineNumber().equals(thisFrame.getLineNumber()) &&
                 thatFrame.getMethodSignature().equals(thisFrame.getMethodSignature()) &&
-                this.cls.getId() == ((AllocationKey)that).cls.getId();
+                this.classId == ((AllocationKey) that).classId;
     }
 
     public StackFrame getFrame() {

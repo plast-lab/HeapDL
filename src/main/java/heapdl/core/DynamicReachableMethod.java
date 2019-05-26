@@ -1,7 +1,7 @@
 package heapdl.core;
 
-import com.sun.tools.hat.internal.model.StackFrame;
-import com.sun.tools.hat.internal.model.StackTrace;
+import heapdl.hprof.StackFrame;
+import heapdl.hprof.StackTrace;
 import heapdl.io.Database;
 import heapdl.io.PredicateFile;
 
