@@ -22,7 +22,7 @@ repositories {
 
 # Generating a heap snapshot for use with HeapDL
 
-## OpenJDK/IBM JDK (Java 8)
+## OpenJDK/IBM JDK (Java <= 8)
 
 To take a heap snapshot of a running program (`Program.jar`) on
 program exit, run:
@@ -31,7 +31,19 @@ program exit, run:
 java -agentlib:hprof=heap=dump,format=b,depth=8 -jar Program.jar
 ```
 
-## OpenJDK/IBM JDK (Java 11)
+## OpenJDK (Java 9-10)
+
+To take a heap snapshot of a program (`Program.jar`) on
+program exit, first build the heapDump-agent and
+then run:
+
+```
+java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -jar Program.jar
+```
+The heap snapshot for Java 9-10 doesn't contain stack
+traces.
+
+## OpenJDK (Java >= 11)
 
 To take a heap snapshot of a program (`Program.jar`) on
 program exit, first build the heapDump-agent and the 

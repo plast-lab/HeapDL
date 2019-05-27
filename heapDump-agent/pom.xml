@@ -42,8 +42,6 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
-                    <release>11</release>  <!-- same as <java.version> -->
-                    <target>11</target>    <!-- same as <java.version> -->
                     <!-- get all project dependencies -->
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -80,9 +78,9 @@
     </build>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <java.version>11</java.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <java.version>8</java.version>
     </properties>
 
 </project>
