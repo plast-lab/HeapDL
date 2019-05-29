@@ -31,30 +31,47 @@ program exit, run:
 java -agentlib:hprof=heap=dump,format=b,depth=8 -jar Program.jar
 ```
 
+It will produce a java.hprof file and then you can run HeapDL
+with:
+
+```
+java -jar build/libs/HeapDL-all-1.1.0.jar java.hprof --out output-dir
+```
+
 ## OpenJDK (Java 9-10)
 
 To take a heap snapshot of a program (`Program.jar`) on
-program exit, first build the heapDump-agent and
+program exit, first build the [heapDump-agent](heapDump-agent/README.md) and
 then run:
 
 ```
 java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -jar Program.jar
 ```
+
 The heap snapshot for Java 9-10 doesn't contain stack
-traces.
+traces. It will only produce a heap-dump.hprof and then you
+can run HeapDL with:
+
+```
+java -jar build/libs/HeapDL-all-1.1.0.jar heap-dump.hprof --out output-dir
+```
 
 ## OpenJDK (Java >= 11)
 
 To take a heap snapshot of a program (`Program.jar`) on
-program exit, first build the heapDump-agent and the 
-stackTraces-agent and then run:
+program exit, first build the [heapDump-agent](heapDump-agent/README.md) and the
+[stackTraces-agent](stackTraces-agent/README.md) and then run:
 
 ```
 java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -agentpath:stackTraces-agent/libStackTracesAgent.so -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -jar Program.jar
 ```
 
-Use the --stackTraces argument to pass the stack traces file 
-to HeapDL.
+It will produce a heap-dump.hprof file and a
+stackTraces.csv then you can run HeapDL with:
+
+```
+java -jar build/libs/HeapDL-all-1.1.0.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
+```
 
 ## Android
 
