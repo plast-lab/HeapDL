@@ -37,6 +37,7 @@ public class SystemTransformer implements ClassFileTransformer {
             m.addLocalVariable("pid", CtClass.intType);
 
             StringBuilder codeBlock = new StringBuilder();
+
             codeBlock.append("pid = ProcessHandleImpl.current().pid();");
             codeBlock.append("try {");
             codeBlock.append("Process p = Runtime.getRuntime().exec(\"jmap -dump:format=b,file=" + this.heapDumpFilename + " \" + pid);");
