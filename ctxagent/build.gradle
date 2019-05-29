@@ -9,6 +9,7 @@ repositories {
     mavenCentral()
 }
 
+
 task fatjar(type: Jar) {
     baseName = 'ctxagent'
     manifest {

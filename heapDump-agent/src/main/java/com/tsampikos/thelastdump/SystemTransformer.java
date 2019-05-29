@@ -37,8 +37,9 @@ public class SystemTransformer implements ClassFileTransformer {
             m.addLocalVariable("pid", CtClass.intType);
 
             StringBuilder codeBlock = new StringBuilder();
+
             codeBlock.append("pid = ProcessHandleImpl.current().pid();");
-            codeBlock.append("Process p = Runtime.getRuntime().exec(\"/bin/jmap -dump:format=b,file=" + this.heapDumpFilename + " \" + pid);");
+            codeBlock.append("Process p = Runtime.getRuntime().exec(\"jmap -dump:format=b,file=" + this.heapDumpFilename + " \" + pid);");
             codeBlock.append("p.waitFor();");
             m.insertBefore(codeBlock.toString());
 
@@ -46,6 +47,7 @@ public class SystemTransformer implements ClassFileTransformer {
             cc.detach();
         } catch (NotFoundException | CannotCompileException | IOException e) {
             e.printStackTrace();
+            System.err.println("Could not execute jmap, please check whether it is in your PATH.");
         }
         return byteCode;
     }
