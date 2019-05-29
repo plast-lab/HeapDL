@@ -38,8 +38,12 @@ public class SystemTransformer implements ClassFileTransformer {
 
             StringBuilder codeBlock = new StringBuilder();
             codeBlock.append("pid = ProcessHandleImpl.current().pid();");
-            codeBlock.append("Process p = Runtime.getRuntime().exec(\"/bin/jmap -dump:format=b,file=" + this.heapDumpFilename + " \" + pid);");
+            codeBlock.append("try {");
+            codeBlock.append("Process p = Runtime.getRuntime().exec(\"jmap -dump:format=b,file=" + this.heapDumpFilename + " \" + pid);");
             codeBlock.append("p.waitFor();");
+            codeBlock.append("} catch (Exception e) {");
+            codeBlock.append("System.err.println(\"Could not execute jmap! Please make sure it's in your PATH.\");");
+            codeBlock.append("}");
             m.insertBefore(codeBlock.toString());
 
             byteCode = cc.toBytecode();
