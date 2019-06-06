@@ -63,11 +63,16 @@ program exit, first build the [heapDump-agent](heapDump-agent/README.md) and the
 [stackTraces-agent](stackTraces-agent/README.md) and then run:
 
 ```
-java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -agentpath:stackTraces-agent/libStackTracesAgent.so -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -jar Program.jar
+java -javaagent:heapDump-agent/target/theLastDump-1.0-SNAPSHOT-jar-with-dependencies.jar -agentpath:stackTraces-agent/libStackTracesAgent.so=sampling=512kb,depth=8 -XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC -jar Program.jar
 ```
 
-It will produce a heap-dump.hprof file and a
-stackTraces.csv then you can run HeapDL with:
+For the stackTraces-agent you can configure the
+sampling rate and the depth of the stack traces
+by using the optional arguments.
+
+The above command will produce a heap-dump.hprof
+file and a stackTraces.csv and then you can run
+HeapDL with:
 
 ```
 java -jar build/libs/HeapDL-all-1.1.0.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
