@@ -11,7 +11,7 @@ group = 'com.github.plast-lab'
 sourceCompatibility = 1.8
 
 wrapper {
-    gradleVersion = "4.9"
+    gradleVersion = "5.4.1"
 }
 
 repositories {
