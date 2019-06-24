@@ -1,6 +1,6 @@
 package heapdl.io;
 
-import com.sun.tools.hat.internal.model.JavaClass;
+import heapdl.hprof.JavaClass;
 
 /**
  * Created by neville on 15/02/2017.
@@ -16,6 +16,6 @@ public class FactEncoders {
     }
 
     public static String encodeClass(JavaClass obj) {
-        return "<class " + obj.getName() + ">";
+        return "<class " + obj.getClassName() + ">";
     }
 }

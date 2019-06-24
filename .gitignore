@@ -1,5 +1,6 @@
 # Compiled class file
 *.class
+build/
 
 # Log file
 *.log
@@ -26,3 +27,6 @@ hs_err_pid*
 
 # Gradle directory
 .gradle
+
+# JNI test
+ctxagent/jni-test/libhello.so

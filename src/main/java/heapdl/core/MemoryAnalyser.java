@@ -1,17 +1,15 @@
 package heapdl.core;
 
-import com.sun.tools.hat.internal.model.*;
+import edu.tufts.eaftan.hprofparser.parser.HprofParser;
+import heapdl.hprof.*;
 import heapdl.io.Database;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 
 /**
@@ -21,21 +19,29 @@ public class MemoryAnalyser {
 
     static boolean EXTRACT_STRING_CONSTANTS = false;
 
-    private static List<String> filenames;
+    private final List<String> filenames;
+
+    private final List<String> stackTracesFilenames;
 
     private Set<DynamicFact> dynamicFacts = ConcurrentHashMap.newKeySet();
 
     private HeapAbstractionIndexer heapAbstractionIndexer = null;
 
-    public MemoryAnalyser(List<String> filenames, boolean uniqueStings) {
+    private StackTraces stackTraces;
+
+    public MemoryAnalyser(List<String> filenames, List<String> stackTracesFilenames, boolean uniqueStings) {
         this.filenames = filenames;
         EXTRACT_STRING_CONSTANTS = uniqueStings;
         if (uniqueStings) System.out.println("(Experimental) Strings in Heap dump will be analyzed.");
+        this.stackTracesFilenames = stackTracesFilenames;
     }
 
     public void resolveFactsFromDump(String filename, String sensitivity) throws IOException, InterruptedException {
-        Snapshot snapshot = DumpParsingUtil.getSnapshotFromFile(filename);
+        Snapshot snapshot = new Snapshot();
+        HprofParser hprofParser = new HprofParser(new SnapshotHandler(snapshot, stackTraces, EXTRACT_STRING_CONSTANTS));
+        hprofParser.parse(new File(filename));
 
+        /*
         try {
             Class<?> heapAbstractionIndexerClass = Class.forName(
                     getClass().getPackage().getName()+".HeapAbstractionIndexer" + sensitivity
@@ -48,6 +54,8 @@ public class MemoryAnalyser {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        */
+        heapAbstractionIndexer = new HeapAbstractionIndexerInsensitive(snapshot);
 
 
         System.out.println("Extracting facts from heap dump...");
@@ -56,39 +64,52 @@ public class MemoryAnalyser {
         Set<DynamicArrayIndexPointsTo> dynamicArrayIndexPointsToSet = ConcurrentHashMap.newKeySet();
         Set<DynamicStaticFieldPointsTo> dynamicStaticFieldPointsToSet = ConcurrentHashMap.newKeySet();
 
-        Enumeration<JavaHeapObject> instances = snapshot.getThings();
-        Collections.list(instances).parallelStream().forEach(heap -> {
+        ArrayList<JavaThing> instances = snapshot.getThings();
+        instances.parallelStream().forEach(heap -> {
             if (heap instanceof JavaObject) {
                 JavaObject obj = (JavaObject) heap;
                 String baseHeap = heapAbstractionIndexer.getAllocationAbstraction(obj);
-                JavaClass clazz = obj.getClazz();
 
-                final String objCls = obj.getClazz().toString();
-                if (objCls.startsWith("heapdl") ||
+                String objCls = obj.getClassName();
+                if (objCls.startsWith("heapdlpp") ||
                         objCls.startsWith("javassist") ||
                         objCls.startsWith("java.lang.String")) return;
-                do {
-                    for (JavaField field : clazz.getFields()) {
-                        JavaThing fieldValue = obj.getField(field.getName());
-                        dynamicInstanceFieldPointsToSet.add(new DynamicInstanceFieldPointsTo(baseHeap, field.getName(), clazz.getName(), heapAbstractionIndexer.getAllocationAbstraction(fieldValue)));
+                for (JavaField field : obj.getFields()) {
+                    if (field.getType().equals("Object")) {
+                        JavaThing fieldObj = snapshot.getObj(Long.parseLong(field.getValue()));
+                        if (fieldObj != null) {
+                            dynamicInstanceFieldPointsToSet.add(new DynamicInstanceFieldPointsTo(baseHeap, field.getName(), field.getOwnerClass(), heapAbstractionIndexer.getAllocationAbstraction(fieldObj)));
+                        } else {
+                            dynamicInstanceFieldPointsToSet.add(new DynamicInstanceFieldPointsTo(baseHeap, field.getName(), field.getOwnerClass(), "Primitive Object"));
+                        }
+                    } else {
+                        dynamicInstanceFieldPointsToSet.add(new DynamicInstanceFieldPointsTo(baseHeap, field.getName(), field.getOwnerClass(), "Primitive Object"));
                     }
-                } while ((clazz = clazz.getSuperclass()) != null);
-            } else if (heap instanceof  JavaObjectArray) {
+                }
+            } else if (heap instanceof JavaObjectArray) {
                 JavaObjectArray obj = (JavaObjectArray) heap;
                 String baseHeap = heapAbstractionIndexer.getAllocationAbstraction(obj);
-                for (JavaThing value : obj.getElements()) {
-                    if (value != null)
-                        dynamicArrayIndexPointsToSet.add(new DynamicArrayIndexPointsTo(baseHeap, heapAbstractionIndexer.getAllocationAbstraction(value)));
+                for (long value : obj.getElements()) {
+                    JavaThing fieldObj = snapshot.getObj(value);
+                    if (fieldObj != null) {
+                        dynamicArrayIndexPointsToSet.add(new DynamicArrayIndexPointsTo(baseHeap, heapAbstractionIndexer.getAllocationAbstraction(fieldObj)));
+                    }
                 }
-            } else if (heap instanceof  JavaValueArray) {
+            } else if (heap instanceof JavaValueArray) {
                 // Nothing to do here
             } else if (heap instanceof JavaClass) {
                 JavaClass obj = (JavaClass) heap;
-                for (JavaStatic javaStatic : obj.getStatics()) {
-                    dynamicStaticFieldPointsToSet.add(new DynamicStaticFieldPointsTo(
-                            javaStatic.getField().getName(), obj.getName(),
-                            heapAbstractionIndexer.getAllocationAbstraction(javaStatic.getValue())
-                    ));
+                for (JavaField javaField : obj.getStatics()) {
+                    if (javaField.getType().equals("Object")) {
+                        JavaThing fieldObj = snapshot.getObj(Long.parseLong(javaField.getValue()));
+                        if (fieldObj != null) {
+                            dynamicStaticFieldPointsToSet.add(new DynamicStaticFieldPointsTo(javaField.getName(), obj.getClassName(), heapAbstractionIndexer.getAllocationAbstraction(fieldObj)));
+                        } else {
+                            dynamicStaticFieldPointsToSet.add(new DynamicStaticFieldPointsTo(javaField.getName(), obj.getClassName(), "Primitive Object"));
+                        }
+                    } else {
+                        dynamicStaticFieldPointsToSet.add(new DynamicStaticFieldPointsTo(javaField.getName(), obj.getClassName(), "Primitive Object"));
+                    }
                 }
             } else {
                 throw new RuntimeException("Unknown: " + heap.getClass().toString());
@@ -103,6 +124,11 @@ public class MemoryAnalyser {
     public int getAndOutputFactsToDB(File factDir, String sensitivity) throws IOException, InterruptedException {
         Database db = new Database(factDir, false);
 
+        stackTraces = new StackTraces();
+        for (String filename : stackTracesFilenames) {
+            stackTraces.addStackTraces(filename);
+        }
+
         for (String filename : filenames) {
             try {
                 long startTime = System.nanoTime();
@@ -116,11 +142,11 @@ public class MemoryAnalyser {
 
             Context.write_facts_once(db);
 
-            for (DynamicFact fact: dynamicFacts) {
+            for (DynamicFact fact : dynamicFacts) {
                 fact.write_fact(db);
             }
 
-            for (DynamicFact fact: heapAbstractionIndexer.getDynamicFacts()) {
+            for (DynamicFact fact : heapAbstractionIndexer.getDynamicFacts()) {
                 fact.write_fact(db);
             }
         }

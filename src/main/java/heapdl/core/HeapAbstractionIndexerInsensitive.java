@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import com.sun.tools.hat.internal.model.Snapshot;
+import heapdl.hprof.Snapshot;
 
 /**
  * Created by neville on 02/04/2017.

@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import com.sun.tools.hat.internal.model.JavaClass;
+import heapdl.hprof.JavaClass;
 import heapdl.io.Database;
 import heapdl.io.FactEncoders;
 
