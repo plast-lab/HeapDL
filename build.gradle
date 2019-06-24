@@ -33,6 +33,10 @@ dependencies {
     compile "ext:hprof-parser:1.0-SNAPSHOT"
 }
 
+compileJava {
+    options.compilerArgs << '-Xlint:unchecked'
+}
+
 task fatjar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'heapdl.main.Main',
