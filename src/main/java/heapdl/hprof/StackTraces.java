@@ -19,7 +19,11 @@ public class StackTraces {
         List<StackFrame> stackFrames = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             while ((line = br.readLine()) != null) {
+                if (line.contains("(null)"))
+                    continue;
+
                 String[] frame = line.split("\t");
+
                 if (!objId.equals(frame[0])) {
                     stackTraces.put(Long.parseLong(objId), new StackTrace(stackFrames.toArray(new StackFrame[0])));
 
