@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,5 +50,9 @@ public class StackTraces {
 
     public StackTrace getStackTrace(long objId) {
         return stackTraces.get(objId);
+    }
+
+    public Collection<StackTrace> getAllStackTraces() {
+        return stackTraces.values();
     }
 }

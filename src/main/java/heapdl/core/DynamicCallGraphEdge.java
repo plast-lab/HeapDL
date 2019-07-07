@@ -55,7 +55,7 @@ public class DynamicCallGraphEdge implements DynamicFact {
     }
 
     public static Collection<DynamicCallGraphEdge> fromStackTrace(StackTrace trace) {
-        if (trace == null || trace.getFrames() == null)
+        if (trace == null || trace.getFrames() == null || trace.getFrames().length == 0)
             return new ArrayList<>();
         StackFrame[] frames = trace.getFrames();
         ArrayList<DynamicCallGraphEdge> edges = new ArrayList<>(frames.length - 1);

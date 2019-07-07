@@ -151,9 +151,24 @@ public class MemoryAnalyser {
             }
         }
 
+
+        Set<DynamicCallGraphEdge> dynamicCallGraphEdges = ConcurrentHashMap.newKeySet();
+        Set<DynamicReachableMethod> dynamicReachableMethods = ConcurrentHashMap.newKeySet();
+
+        stackTraces.getAllStackTraces().parallelStream().forEach(trace -> {
+            dynamicCallGraphEdges.addAll(DynamicCallGraphEdge.fromStackTrace(trace));
+            dynamicReachableMethods.addAll(DynamicReachableMethod.fromStackTrace(trace));
+        });
+        for (DynamicFact fact: dynamicCallGraphEdges) {
+            fact.write_fact(db);
+        }
+        for (DynamicFact fact: dynamicReachableMethods) {
+            fact.write_fact(db);
+        }
+
         db.flush();
         db.close();
-        return dynamicFacts.size();
+        return dynamicFacts.size() + dynamicCallGraphEdges.size() + dynamicReachableMethods.size();
     }
 
 }
