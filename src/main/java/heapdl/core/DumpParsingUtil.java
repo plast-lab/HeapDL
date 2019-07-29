@@ -150,7 +150,7 @@ public class DumpParsingUtil {
     }
 
     public static String methodSignatureFromStackFrame(StackFrame frame) {
-        return frame.getMethodSignature().replace("<MethodName>", frame.getMethodName());
+        return convertType(frame.getMethodSignature())[0].replace("<MethodName>", frame.getMethodName());
     }
 
     public static String convertArguments(String arguments) {
