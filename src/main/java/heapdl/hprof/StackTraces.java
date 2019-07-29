@@ -1,5 +1,6 @@
 package heapdl.hprof;
 
+import heapdl.core.DumpParsingUtil;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -7,8 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
-import static heapdl.core.DumpParsingUtil.*;
+import org.clyze.utils.TypeUtils;
 
 public class StackTraces {
 
@@ -34,14 +34,13 @@ public class StackTraces {
                 String methodSignature = frame[3];
                 //System.out.println("Method signature: " + frame[3]);
                 String arguments = methodSignature.substring(methodSignature.indexOf("(")+1, methodSignature.lastIndexOf(")"));
-	            String raisedReturnType = raiseTypeId(methodSignature.substring(methodSignature.lastIndexOf(")")+1));
+	            String raisedReturnType = TypeUtils.raiseTypeId(methodSignature.substring(methodSignature.lastIndexOf(")")+1));
 	            String raisedSignature = raisedReturnType + " " + frame[2] + "(";
 
-	            if (!arguments.isEmpty()) {
-                    raisedSignature += convertArguments(arguments);
-	            }
+	            if (!arguments.isEmpty())
+                    raisedSignature += DumpParsingUtil.convertArguments(arguments);
 	            raisedSignature += ")";
-                stackFrames.add(new StackFrame(frame[2], raisedSignature, raiseTypeId(frame[5]), Integer.parseInt(frame[4])));
+                stackFrames.add(new StackFrame(frame[2], raisedSignature, TypeUtils.raiseTypeId(frame[5]), Integer.parseInt(frame[4])));
             }
         } catch (IOException e) {
             e.printStackTrace();
