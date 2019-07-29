@@ -27,9 +27,9 @@ class HeapAbstractionIndexer {
 
     protected StackFrame getAllocationFrame(JavaThing obj) {
         StackTrace trace = obj.getStackTrace();
-        // Store dynamic edges
-        //dynamicFacts.addAll(DynamicCallGraphEdge.fromStackTrace(trace));
-        //dynamicFacts.addAll(DynamicReachableMethod.fromStackTrace(trace));
+        // Store dynamic edges (from HPROF data, not separate stack traces).
+        dynamicFacts.addAll(DynamicCallGraphEdge.fromStackTrace(trace));
+        dynamicFacts.addAll(DynamicReachableMethod.fromStackTrace(trace));
 
         //JavaClass clazz = obj.getClazz();
         String clazz = obj.getClassName();
