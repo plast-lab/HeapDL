@@ -24,11 +24,7 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile "org.apache.ivy:ivy:2.3.0",
-            "log4j:log4j:1.2.14",                              // Logging implementation
-            "commons-io:commons-io:2.4",                       // File Utils
-            "org.clyze:clue-common:3.11.+",
-            "com.google.guava:guava:27.1-jre"
+    compile "org.clyze:clue-common:3.11.+"
     // https://mvnrepository.com/artifact/com.offbytwo/docopt
     compile group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
     compile "ext:hprof-parser:1.0-SNAPSHOT"
