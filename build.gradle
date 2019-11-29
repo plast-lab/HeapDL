@@ -6,7 +6,7 @@ plugins {
     id 'net.researchgate.release' version '2.6.0'
 }
 
-group = 'com.github.plast-lab'
+group = 'org.clyze'
 
 sourceCompatibility = 1.8
 

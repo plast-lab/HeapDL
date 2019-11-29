@@ -7,7 +7,7 @@ HeapDL is integrated with the Doop pointer analysis framework, however it is als
 
 ```
 $ ./gradlew fatjar
-$ java -jar build/libs/HeapDL-all-1.1.1.jar file.hprof --out output-dir
+$ java -jar build/libs/HeapDL-all-1.1.6.jar file.hprof --out output-dir
 ```
 
 # Using HeapDL as a library
