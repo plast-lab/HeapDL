@@ -42,6 +42,7 @@ task fatjar(type: Jar) {
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
 
