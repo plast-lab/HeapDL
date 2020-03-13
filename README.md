@@ -1,25 +1,32 @@
 # HeapDL
 Heaps Don't Lie!  Published in PACM PL OOPSLA (2017) ([pdf](http://www.nevillegrech.com/heapdl-oopsla17.pdf))
 
-HeapDL is integrated with the Doop pointer analysis framework, however it is also available as a standalone tool.
+HeapDL is integrated with the Doop pointer analysis framework, however
+it is also available as a standalone tool and as a library.
 
 # Using HeapDL in standalone mode
 
 ```
 $ ./gradlew fatjar
-$ java -jar build/libs/HeapDL-all-1.1.6.jar file.hprof --out output-dir
+$ java -jar build/libs/HeapDL-all-1.1.9.jar file.hprof --out output-dir
 ```
 
 # Using HeapDL as a library
+
 ````
 repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
-   }
-   dependencies {
-         compile 'com.github.plast-lab:HeapDL:master-SNAPSHOT'
-   }
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+dependencies {
+    compile 'com.github.plast-lab:HeapDL:1.1.9'
+}
 ````
+
+The basic class when using HeapDL as a library is
+`heapdl.core.MemoryAnalyser` (and the `heapdl.io.HeapDatabaseConsumer`
+interface that can be implemented by clients). For an example of using
+HeapDL as a library, see class `heapdl.main.Main`.
 
 # Generating a heap snapshot for use with HeapDL
 
@@ -36,7 +43,7 @@ It will produce a java.hprof file and then you can run HeapDL
 with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.1.jar java.hprof --out output-dir
+java -jar build/libs/HeapDL-all-1.1.9.jar java.hprof --out output-dir
 ```
 
 ## OpenJDK (Java 9-10)
@@ -54,7 +61,7 @@ traces. It will only produce a heap-dump.hprof and then you
 can run HeapDL with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.1.jar heap-dump.hprof --out output-dir
+java -jar build/libs/HeapDL-all-1.1.9.jar heap-dump.hprof --out output-dir
 ```
 
 ## OpenJDK (Java >= 11)
@@ -76,7 +83,7 @@ file and a stackTraces.csv and then you can run
 HeapDL with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.1.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
+java -jar build/libs/HeapDL-all-1.1.9.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
 ```
 
 ## Android
