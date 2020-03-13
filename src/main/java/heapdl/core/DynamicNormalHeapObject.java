@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -32,7 +32,7 @@ public class DynamicNormalHeapObject implements DynamicHeapObject {
 
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_ALLOCATION, ""+lineNumber, inMethod, type, heapRepresentation);
         db.add(PredicateFile.DYNAMIC_NORMAL_HEAP_OBJECT, heapRepresentation, contextRepresentation, representation);
     }

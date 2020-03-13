@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -49,7 +49,7 @@ public class DynamicStaticFieldPointsTo implements DynamicFact{
     }
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         db.add(PredicateFile.DYNAMIC_STATIC_FIELD_POINTS_TO, fieldName, fieldDeclaringClass, heap);
     }
 }

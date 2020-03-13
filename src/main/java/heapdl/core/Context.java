@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -12,7 +12,7 @@ public interface Context extends DynamicFact {
     };
     public static final String[] DEFAULT_CTXS = new String[] { ContextInsensitive.IMMUTABLE_DCTX };
 
-    public static void write_facts_once(Database db) {
+    public static void write_facts_once(HeapDatabaseConsumer db) {
         for (String defaultCtx: DEFAULT_CTXS) {
             db.add(PredicateFile.DYNAMIC_CONTEXT, defaultCtx, DEFAULT_CTX_ARGS);
         }

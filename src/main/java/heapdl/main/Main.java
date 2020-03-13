@@ -3,7 +3,6 @@ package heapdl.main;
 import java.io.File;
 import java.util.Map;
 import java.util.List;
-
 import heapdl.core.MemoryAnalyser;
 import org.docopt.Docopt;
 
@@ -63,7 +62,7 @@ public class Main {
         // Generate facts from the HPROF inputs.
         MemoryAnalyser m = new MemoryAnalyser(hprofs, stackTraces, !((boolean) opts.get("--no-strings")));
         try {
-            int n = m.getAndOutputFactsToDB(new File(factsDir), sensitivity);
+            int n = m.outputToDir(factsDirFile, sensitivity);
             System.out.println("Generated " + n + " facts.");
         } catch (Exception ex) {
             ex.printStackTrace();

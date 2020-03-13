@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -19,7 +19,7 @@ public class DoubleContext<T extends ComposableContext> implements Context {
     }
 
     @Override
-    public final void write_fact(Database db) {
+    public final void write_fact(HeapDatabaseConsumer db) {
         String[] args = DEFAULT_CTX_ARGS.clone();
 
         for (int i = 0, j = ctx1.getStartIndex();

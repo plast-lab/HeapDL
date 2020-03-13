@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -46,7 +46,7 @@ public class ContextObj implements ComposableContext {
     }
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         String[] args = DEFAULT_CTX_ARGS.clone();
         args[0] = representation;
         db.add(PredicateFile.DYNAMIC_CONTEXT, representation, args);

@@ -2,7 +2,7 @@ package heapdl.core;
 
 import heapdl.hprof.StackFrame;
 import heapdl.hprof.StackTrace;
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class DynamicReachableMethod implements DynamicFact {
     }
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         db.add(PredicateFile.DYNAMIC_REACHABLE_METHOD, representation);
 
     }

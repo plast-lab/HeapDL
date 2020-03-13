@@ -2,8 +2,9 @@ package heapdl.core;
 
 import edu.tufts.eaftan.hprofparser.parser.HprofParser;
 import heapdl.hprof.*;
+import heapdl.io.BasicDatabaseConsumer;
 import heapdl.io.Database;
-
+import heapdl.io.HeapDatabaseConsumer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,9 +122,8 @@ public class MemoryAnalyser {
         dynamicFacts.addAll(dynamicArrayIndexPointsToSet);
     }
 
-    public int getAndOutputFactsToDB(File factDir, String sensitivity) throws IOException, InterruptedException {
-        Database db = new Database(factDir, false);
-
+    public int getAndOutputFactsToDB(String sensitivity,
+                                     HeapDatabaseConsumer db) throws IOException, InterruptedException {
         stackTraces = new StackTraces();
         for (String filename : stackTracesFilenames) {
             stackTraces.addStackTraces(filename);
@@ -166,9 +166,23 @@ public class MemoryAnalyser {
             fact.write_fact(db);
         }
 
-        db.flush();
-        db.close();
+        db.finishWriting();
         return dynamicFacts.size() + dynamicCallGraphEdges.size() + dynamicReachableMethods.size();
     }
 
+    /**
+     * Helper method to output facts to a directory using the default
+     * database consumer.
+     *
+     * @param factsDirFile    a File representing the output directory
+     * @param sensitivity     the sensitivity
+     * @return                the number of facts generated
+     * @throws IOException on output error
+     * @throws InterruptedException if output was interrupted
+     */
+    public int outputToDir(File factsDirFile, String sensitivity)
+        throws IOException, InterruptedException {
+        Database db0 = new Database(factsDirFile, false);
+        return getAndOutputFactsToDB(sensitivity, new BasicDatabaseConsumer(db0));
+    }
 }

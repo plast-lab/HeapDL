@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 
 /**
  * Created by neville on 15/03/2017.
@@ -15,7 +15,7 @@ public class ContextInsensitive implements Context {
     }
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         // do not write to db!
     }
 

@@ -1,6 +1,6 @@
 package heapdl.core;
 
-import heapdl.io.Database;
+import heapdl.io.HeapDatabaseConsumer;
 import heapdl.io.PredicateFile;
 
 /**
@@ -45,7 +45,7 @@ public class DynamicArrayIndexPointsTo implements DynamicFact {
     }
 
     @Override
-    public void write_fact(Database db) {
+    public void write_fact(HeapDatabaseConsumer db) {
         db.add(PredicateFile.DYNAMIC_ARRAY_INDEX_POINTS_TO, baseHeap, heap);
     }
 }
