@@ -1,5 +1,5 @@
 # HeapDL
-Heaps Don't Lie!  Published in PACM PL OOPSLA (2017) ([pdf](http://www.nevillegrech.com/heapdl-oopsla17.pdf))
+Heaps Don't Lie!  Published in PACM PL OOPSLA (2017) ([pdf](https://arxiv.org/abs/1905.02088))
 
 HeapDL is integrated with the Doop pointer analysis framework, however
 it is also available as a standalone tool and as a library.
