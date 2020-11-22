@@ -6,6 +6,7 @@ plugins {
     //see https://github.com/researchgate/gradle-release
     id 'net.researchgate.release' version '2.6.0'
     id 'org.mikeneck.graalvm-native-image' version 'v0.8.0'
+    id "com.jfrog.bintray" version "1.8.4"
 }
 
 group = 'org.clyze'
@@ -116,4 +117,29 @@ nativeImage {
 	'--enable-all-security-services',
 	'--report-unsupported-elements-at-runtime'
     )
+}
+
+// Upload to bintray with:
+//   ./gradlew clean build bintrayUpload --info
+// Needs properties: bintray_user, bintray_key.
+if (project.hasProperty('bintray_user') && project.hasProperty('bintray_key')) {
+    bintray {
+        user = bintray_user
+        key = bintray_key
+        publications = ['mavenJava']
+        configurations = ['archives']
+        pkg {
+            repo = 'plast-lab'
+            name = 'HeapDL'
+            desc = 'The HeapDL tool.'
+            licenses = ['MIT']
+            labels = ['java']
+            vcsUrl = 'https://github.com/plast-lab/HeapDL'
+            version {
+                name = project.version
+                released = new Date()
+                vcsTag = project.version
+            }
+        }
+    }
 }
