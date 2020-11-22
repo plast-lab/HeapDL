@@ -6,9 +6,18 @@ it is also available as a standalone tool and as a library.
 
 # Using HeapDL in standalone mode
 
+Method 1 (JAR):
+
 ```
 $ ./gradlew fatjar
-$ java -jar build/libs/HeapDL-all-1.1.9.jar file.hprof --out output-dir
+$ java -jar build/libs/HeapDL-all-1.1.10.jar file.hprof --out output-dir
+```
+
+Method 2 (native-image):
+
+```
+$ ./gradlew nativeImage
+$ build/bin/heapdl file.hprof --out output-dir
 ```
 
 # Using HeapDL as a library
