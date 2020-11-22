@@ -1,14 +1,18 @@
 plugins {
-	id 'java'
-	id 'maven'
+    id 'java'
+    id 'application'
+    id 'maven'
     id 'maven-publish'
     //see https://github.com/researchgate/gradle-release
     id 'net.researchgate.release' version '2.6.0'
+    id 'org.mikeneck.graalvm-native-image' version 'v0.8.0'
 }
 
 group = 'org.clyze'
 
 sourceCompatibility = 1.8
+
+mainClassName = 'heapdl.main.Main'
 
 wrapper {
     gradleVersion = "6.2"
@@ -37,7 +41,7 @@ compileJava {
 
 task fatjar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'heapdl.main.Main',
+        attributes 'Main-Class': mainClassName,
                    'Implementation-Version': version
     }
     baseName = project.name + '-all'
@@ -97,4 +101,19 @@ if (project.hasProperty('artifactory_user')) {
     }
 
     afterReleaseBuild.dependsOn publish
+}
+
+nativeImage {
+    graalVmHome = System.getenv('GRAALVM_HOME')
+    mainClass = mainClassName
+    executableName = 'heapdl'
+    outputDirectory = file("$buildDir/bin")
+    arguments(
+	'--allow-incomplete-classpath',
+	'--report-unsupported-elements-at-runtime',
+	'--no-fallback',
+	'--no-server',
+	'--enable-all-security-services',
+	'--report-unsupported-elements-at-runtime'
+    )
 }
