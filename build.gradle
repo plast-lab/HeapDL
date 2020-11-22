@@ -21,9 +21,9 @@ wrapper {
 
 repositories {
     mavenCentral()
-    maven {
-        url "http://centauri.di.uoa.gr:8081/artifactory/plast-public"
-    }
+    maven { url 'https://dl.bintray.com/gfour/plast-lab' }
+    maven { url 'https://jitpack.io' }
+    // maven { url "http://centauri.di.uoa.gr:8081/artifactory/plast-public" }
 }
 
 dependencies {
@@ -32,7 +32,8 @@ dependencies {
     compile "org.clyze:clue-common:3.22.5"
     // https://mvnrepository.com/artifact/com.offbytwo/docopt
     compile group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
-    compile "ext:hprof-parser:1.0-SNAPSHOT"
+    // compile "ext:hprof-parser:1.0"
+    implementation 'com.github.eaftan:hprof-parser:3668fd734f79c2b949f0703654dfda812c800707'
     runtime "com.google.guava:guava:27.1-jre" // needed by hprof-parser
 }
 
