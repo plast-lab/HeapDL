@@ -11,7 +11,7 @@ group = 'org.clyze'
 sourceCompatibility = 1.8
 
 wrapper {
-    gradleVersion = "5.4.1"
+    gradleVersion = "6.2"
 }
 
 repositories {
