@@ -24,7 +24,7 @@ public final class Recorder {
             Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, Integer.valueOf(old + 1));
                 edgeContexts.add(new EdgeContexts(previousReceiver, receiver));
             }
         }
@@ -45,7 +45,7 @@ public final class Recorder {
             Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, Integer.valueOf(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
@@ -57,7 +57,7 @@ public final class Recorder {
             Integer oldO = sampled.get(klass);
             int old = oldO == null ? 0 : oldO.intValue();
             if (old < 1000) {
-                sampled.put(klass, new Integer(old + 1));
+                sampled.put(klass, Integer.valueOf(old + 1));
                 objectAndContexts.add(new ObjectAndContext(hctx, obj));
             }
         }
