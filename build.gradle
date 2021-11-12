@@ -16,7 +16,7 @@ sourceCompatibility = 1.8
 mainClassName = 'heapdl.main.Main'
 
 wrapper {
-    gradleVersion = "6.2"
+    gradleVersion = '6.7'
 }
 
 repositories {
