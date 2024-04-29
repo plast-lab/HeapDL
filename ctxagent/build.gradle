@@ -11,7 +11,7 @@ repositories {
 
 
 task fatjar(type: Jar) {
-    baseName = 'ctxagent'
+    archiveBaseName = 'ctxagent'
     manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',
                 'Implementation-Version': version,
@@ -36,6 +36,6 @@ allprojects {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    implementation group: 'org.ow2.asm', name: 'asm-debug-all', version: '5.1'
 }
