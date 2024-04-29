@@ -18,24 +18,6 @@
 
     <build>
         <plugins>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Premain-Class>com.tsampikos.thelastdump.HeapDumpAgent</Premain-Class>
-                            <Agent-Class>com.tsampikos.thelastdump.HeapDumpAgent</Agent-Class>
-                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                            <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            -->
             <!-- Maven Assembly Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
