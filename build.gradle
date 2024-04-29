@@ -16,7 +16,7 @@ sourceCompatibility = 1.8
 mainClassName = 'heapdl.main.Main'
 
 wrapper {
-    gradleVersion = '6.7'
+    gradleVersion = '8.7'
 }
 
 repositories {
@@ -32,7 +32,7 @@ dependencies {
     compile group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
     implementation 'edu.tufts.eaftan.hprofparser:hprof-parser:1.0'
     // compile "ext:hprof-parser:1.0"    // old artifactory dependency
-    runtime "com.google.guava:guava:27.1-jre" // needed by hprof-parser
+    runtime "com.google.guava:guava:33.0.0-jre" // needed by hprof-parser
 }
 
 compileJava {
