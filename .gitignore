@@ -25,6 +25,9 @@ hs_err_pid*
 # Emacs backup files
 *~
 
+# VS Code
+.vscode
+
 # Gradle directory
 .gradle
 
