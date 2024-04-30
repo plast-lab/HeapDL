@@ -36,8 +36,8 @@
                         </manifest>
                         -->
                         <manifestEntries>
-                            <Premain-Class>com.tsampikos.thelastdump.HeapDumpAgent</Premain-Class>
-                            <Agent-Class>com.tsampikos.thelastdump.HeapDumpAgent</Agent-Class>
+                            <Premain-Class>org.clyze.thelastdump.HeapDumpAgent</Premain-Class>
+                            <Agent-Class>org.clyze.thelastdump.HeapDumpAgent</Agent-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                             <Can-Set-Native-Method-Prefix>false</Can-Set-Native-Method-Prefix>
