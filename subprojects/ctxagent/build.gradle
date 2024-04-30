@@ -9,6 +9,9 @@ repositories {
     mavenCentral()
 }
 
+wrapper {
+    gradleVersion = '8.7'
+}
 
 task fatjar(type: Jar) {
     archiveBaseName = 'ctxagent'
