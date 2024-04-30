@@ -29,10 +29,8 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
 
     implementation "com.offbytwo:docopt:0.6.0.20150202",
-        // https://mvnrepository.com/artifact/com.offbytwo/docopt
-        "com.github.eaftan:hprof-parser:-SNAPSHOT",
-        // compile "ext:hprof-parser:1.0"    // old artifactory dependency
-        "com.github.plast-lab:clue-common:${clueCommonVersion}"
+                    "com.github.eaftan:hprof-parser:-SNAPSHOT",
+                    "com.github.plast-lab:clue-common:${clueCommonVersion}"
 
     runtimeOnly "com.google.guava:guava:33.0.0-jre" // needed by hprof-parser
 }
