@@ -38,7 +38,9 @@ public class Main {
                         .parse(args);
 
         // Read command-line options.
+        @SuppressWarnings("unchecked")
         List<String> hprofs = (List<String>)opts.get("<file>");
+        @SuppressWarnings("unchecked")
         List<String> stackTraces = (List<String>)opts.get("--stackTraces");
         String sensitivity = (String)opts.get("--sensitivity");
         if (sensitivity == null) {
