@@ -18,7 +18,7 @@ dependencies {
     api libs.org.javassist.javassist
 }
 
-group = 'com.tsampikos'
+group = 'org.clyze'
 version = '1.0-SNAPSHOT'
 description = 'theLastDump'
 java.sourceCompatibility = JavaVersion.VERSION_1_8

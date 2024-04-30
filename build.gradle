@@ -20,19 +20,20 @@ wrapper {
 
 repositories {
     mavenCentral()
-    maven { url "http://centauri.di.uoa.gr:8081/artifactory/plast-public"
-        allowInsecureProtocol true
-    }
+    maven { url 'https://jitpack.io' }
 }
+
+gradle.rootProject.ext.clueCommonVersion='3.25.4'
 
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
 
-    implementation "org.clyze:clue-common:3.22.5"
-    // https://mvnrepository.com/artifact/com.offbytwo/docopt
-    implementation group: 'com.offbytwo', name: 'docopt', version: '0.6.0.20150202'
-    implementation 'edu.tufts.eaftan.hprofparser:hprof-parser:1.0'
-    // compile "ext:hprof-parser:1.0"    // old artifactory dependency
+    implementation "com.offbytwo:docopt:0.6.0.20150202",
+        // https://mvnrepository.com/artifact/com.offbytwo/docopt
+        "com.github.eaftan:hprof-parser:-SNAPSHOT",
+        // compile "ext:hprof-parser:1.0"    // old artifactory dependency
+        "com.github.plast-lab:clue-common:${clueCommonVersion}"
+
     runtimeOnly "com.google.guava:guava:33.0.0-jre" // needed by hprof-parser
 }
 
