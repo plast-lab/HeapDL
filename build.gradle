@@ -56,11 +56,6 @@ tasks.register('fatjar', Jar) {
     with jar
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
