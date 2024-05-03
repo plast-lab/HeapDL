@@ -10,7 +10,8 @@ plugins {
 
 group = 'org.clyze'
 
-sourceCompatibility = 1.8
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 mainClassName = 'heapdl.main.Main'
 
@@ -39,6 +40,11 @@ compileJava {
     options.compilerArgs << '-Xlint:unchecked'
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.register('fatjar', Jar) {
     manifest {
         attributes 'Main-Class': mainClassName,
@@ -65,6 +71,16 @@ tasks.register('javadocJar', Jar) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact tasks.sourcesJar
+            artifact tasks.javadocJar
+        }
+    }
 }
 
 if (project.hasProperty('artifactory_user')) {
