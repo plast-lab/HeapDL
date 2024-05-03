@@ -65,6 +65,14 @@ artifacts {
     archives javadocJar
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
 if (project.hasProperty('artifactory_user')) {
 
     publishing {
