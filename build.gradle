@@ -56,53 +56,56 @@ tasks.register('fatjar', Jar) {
     with jar
 }
 
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            artifact tasks.sourcesJar
-            artifact tasks.javadocJar
         }
     }
 }
 
-// if (project.hasProperty('artifactory_user')) {
+if (project.hasProperty('artifactory_user')) {
 
-//     publishing {
-//         publications {
-//             mavenJava(MavenPublication) {
-//                 from components.java
-//                 artifact tasks.sourcesJar
-//                 artifact tasks.javadocJar
-//             }
-//         }
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifact tasks.sourcesJar
+                artifact tasks.javadocJar
+            }
+        }
 
-//         repositories {
-//             maven {
-//                 credentials {
-//                     username artifactory_user
-//                     password artifactory_password
-//                 }
-//                 url "$artifactory_contextUrl/libs-public-release-local"
-//             }
-//         }
-//     }
+        repositories {
+            maven {
+                credentials {
+                    username artifactory_user
+                    password artifactory_password
+                }
+                url "$artifactory_contextUrl/libs-public-release-local"
+            }
+        }
+    }
 
-//     release {
-//         failOnSnapshotDependencies = false
-//         failOnUnversionedFiles = false
-//         failOnCommitNeeded = false
+    release {
+        failOnSnapshotDependencies = false
+        failOnUnversionedFiles = false
+        failOnCommitNeeded = false
 
-//         git {
-//            commitVersionFileOnly = true
-//         }
-//         /* publish before releasing
-//            buildTasks =['build', 'publish']
-//          */
-//     }
+        git {
+           commitVersionFileOnly = true
+        }
+        /* publish before releasing
+           buildTasks =['build', 'publish']
+         */
+    }
 
-//     afterReleaseBuild.dependsOn publish
-// }
+    afterReleaseBuild.dependsOn publish
+}
 
 nativeImage {
     graalVmHome = System.getenv('GRAALVM_HOME')
