@@ -4,6 +4,8 @@ Heaps Don't Lie!  Published in PACM PL OOPSLA (2017) ([pdf](https://arxiv.org/ab
 HeapDL is integrated with the Doop pointer analysis framework, however
 it is also available as a standalone tool and as a library.
 
+
+
 # Using HeapDL in standalone mode
 
 Method 1 (JAR):
@@ -28,7 +30,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 dependencies {
-    compile 'com.github.plast-lab:HeapDL:1.1.9'
+    compile 'com.github.plast-lab:HeapDL:1.1.19'
 }
 ````
 

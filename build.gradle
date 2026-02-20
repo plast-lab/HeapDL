@@ -1,52 +1,77 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url="https://jitpack.io" }
+        maven { url="https://repo.grails.org/grails/core/" }
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
     //see https://github.com/researchgate/gradle-release
-    id 'net.researchgate.release' version '2.6.0'
-    id 'org.mikeneck.graalvm-native-image' version 'v0.8.0'
-    id "com.jfrog.bintray" version "1.8.4"
+    id 'net.researchgate.release' version '3.1.0'
+    id 'org.mikeneck.graalvm-native-image' version '1.4.1'
+    id "com.jfrog.bintray" version "1.8.5"
 }
 
 group = 'org.clyze'
 
-sourceCompatibility = 1.8
-
-mainClassName = 'heapdl.main.Main'
+application {
+    mainClass = 'heapdl.main.Main'
+}
 
 wrapper {
-    gradleVersion = '8.7'
+    gradleVersion = '9.3.1'
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven { url='https://jitpack.io' }
 }
-
-gradle.rootProject.ext.clueCommonVersion='3.25.4'
+gradle.rootProject.ext.groovyVersion='5.0.4'
+gradle.rootProject.ext.clueCommonVersion='3.26.2'
 
 dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.1.0-M1'
 
-    implementation "com.offbytwo:docopt:0.6.0.20150202",
-                    "com.github.eaftan:hprof-parser:-SNAPSHOT",
-                    "com.github.plast-lab:clue-common:${clueCommonVersion}"
+    implementation "org.apache.groovy:groovy:${groovyVersion}"                  // Groovy
+    implementation "org.apache.groovy:groovy-ant:${groovyVersion}"
+    implementation "org.apache.groovy:groovy-cli-commons:${groovyVersion}"      // Command line processor (Groovy wrapper)
+    implementation "com.offbytwo:docopt:0.6.0.20150202"
+    implementation "com.github.eaftan:hprof-parser:-SNAPSHOT"
+    implementation "com.github.plast-lab:clue-common:${clueCommonVersion}"
 
-    runtimeOnly "com.google.guava:guava:33.0.0-jre" // needed by hprof-parser
+    runtimeOnly "com.google.guava:guava:33.5.0-jre" // needed by hprof-parser
 }
 
 compileJava {
     options.compilerArgs << '-Xlint:unchecked'
 }
 
-task fatjar(type: Jar) {
+task fatJar(type: Jar) {
+    archiveClassifier = 'all'
+
     manifest {
-        attributes 'Main-Class': mainClassName,
+        attributes 'Main-Class': application.mainClass,
                    'Implementation-Version': version
     }
-    archiveBaseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+    // avoid “duplicate entry” failures when jars contain the same paths
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from sourceSets.main.output
+
+    // stuff dependencies inside the jar
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath
+        .findAll { it.name.endsWith('jar') }
+        .collect { zipTree(it) }
+    }
+
+    // common: strip signature metadata that becomes invalid after repackaging
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
     with jar
 }
 
@@ -60,9 +85,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
+tasks.named("assemble") {
+    dependsOn(sourcesJar, javadocJar)
 }
 
 publishing {
@@ -73,56 +97,56 @@ publishing {
     }
 }
 
-if (project.hasProperty('artifactory_user')) {
+// if (project.hasProperty('artifactory_user')) {
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifact tasks.sourcesJar
-                artifact tasks.javadocJar
-            }
-        }
+//     publishing {
+//         publications {
+//             mavenJava(MavenPublication) {
+//                 from components.java
+//                 artifact tasks.sourcesJar
+//                 artifact tasks.javadocJar
+//             }
+//         }
 
-        repositories {
-            maven {
-                credentials {
-                    username artifactory_user
-                    password artifactory_password
-                }
-                url "$artifactory_contextUrl/libs-public-release-local"
-            }
-        }
-    }
+//         repositories {
+//             maven {
+//                 credentials {
+//                     username artifactory_user
+//                     password artifactory_password
+//                 }
+//                 url "$artifactory_contextUrl/libs-public-release-local"
+//             }
+//         }
+//     }
 
-    release {
-        failOnSnapshotDependencies = false
-        failOnUnversionedFiles = false
-        failOnCommitNeeded = false
+//     release {
+//         failOnSnapshotDependencies = false
+//         failOnUnversionedFiles = false
+//         failOnCommitNeeded = false
 
-        git {
-           commitVersionFileOnly = true
-        }
-        /* publish before releasing
-           buildTasks =['build', 'publish']
-         */
-    }
+//         git {
+//            commitVersionFileOnly = true
+//         }
+//         /* publish before releasing
+//            buildTasks =['build', 'publish']
+//          */
+//     }
 
-    afterReleaseBuild.dependsOn publish
-}
+//     afterReleaseBuild.dependsOn publish
+// }
 
 nativeImage {
     graalVmHome = System.getenv('GRAALVM_HOME')
-    mainClass = mainClassName
+    mainClass = application.mainClass
     executableName = 'heapdl'
     outputDirectory = file("$buildDir/bin")
     arguments(
-	'--allow-incomplete-classpath',
-	'--report-unsupported-elements-at-runtime',
-	'--no-fallback',
-	'--no-server',
-	'--enable-all-security-services',
-	'--report-unsupported-elements-at-runtime'
+        '--allow-incomplete-classpath',
+        '--report-unsupported-elements-at-runtime',
+        '--no-fallback',
+        '--no-server',
+        '--enable-all-security-services',
+        '--report-unsupported-elements-at-runtime'
     )
 }
 
