@@ -12,7 +12,7 @@ Method 1 (JAR):
 
 ```
 $ ./gradlew fatjar
-$ java -jar build/libs/HeapDL-all-1.1.10.jar file.hprof --out output-dir
+$ java -jar build/libs/HeapDL-all-1.1.21.jar file.hprof --out output-dir
 ```
 
 Method 2 (native-image):
@@ -30,7 +30,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 dependencies {
-    compile 'com.github.plast-lab:HeapDL:1.1.19'
+    compile 'com.github.plast-lab:HeapDL:1.1.21'
 }
 ````
 
@@ -54,7 +54,7 @@ It will produce a java.hprof file and then you can run HeapDL
 with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.9.jar java.hprof --out output-dir
+java -jar build/libs/HeapDL-all-1.1.21.jar java.hprof --out output-dir
 ```
 
 ## OpenJDK (Java 9-10)
@@ -72,7 +72,7 @@ traces. It will only produce a heap-dump.hprof and then you
 can run HeapDL with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.9.jar heap-dump.hprof --out output-dir
+java -jar build/libs/HeapDL-all-1.1.21.jar heap-dump.hprof --out output-dir
 ```
 
 ## OpenJDK (Java >= 11)
@@ -94,7 +94,7 @@ file and a stackTraces.csv and then you can run
 HeapDL with:
 
 ```
-java -jar build/libs/HeapDL-all-1.1.9.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
+java -jar build/libs/HeapDL-all-1.1.21.jar heap-dump.hprof --stackTraces stackTraces.csv --out output-dir
 ```
 
 ## Android
