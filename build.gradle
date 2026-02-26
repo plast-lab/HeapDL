@@ -28,7 +28,7 @@ wrapper {
 
 repositories {
     mavenCentral()
-    maven { url='https://jitpack.io' }
+    maven { url = 'https://jitpack.io' }
 }
 gradle.rootProject.ext.groovyVersion='5.0.4'
 gradle.rootProject.ext.clueCommonVersion='3.26.2'
@@ -40,7 +40,7 @@ dependencies {
     implementation "org.apache.groovy:groovy-ant:${groovyVersion}"
     implementation "org.apache.groovy:groovy-cli-commons:${groovyVersion}"      // Command line processor (Groovy wrapper)
     implementation "com.offbytwo:docopt:0.6.0.20150202"
-    implementation "com.github.eaftan:hprof-parser:-SNAPSHOT"
+    implementation "com.github.eaftan:hprof-parser:849678cca7"
     implementation "com.github.plast-lab:clue-common:${clueCommonVersion}"
 
     runtimeOnly "com.google.guava:guava:33.5.0-jre" // needed by hprof-parser
