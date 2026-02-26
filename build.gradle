@@ -97,44 +97,6 @@ publishing {
     }
 }
 
-// if (project.hasProperty('artifactory_user')) {
-
-//     publishing {
-//         publications {
-//             mavenJava(MavenPublication) {
-//                 from components.java
-//                 artifact tasks.sourcesJar
-//                 artifact tasks.javadocJar
-//             }
-//         }
-
-//         repositories {
-//             maven {
-//                 credentials {
-//                     username artifactory_user
-//                     password artifactory_password
-//                 }
-//                 url "$artifactory_contextUrl/libs-public-release-local"
-//             }
-//         }
-//     }
-
-//     release {
-//         failOnSnapshotDependencies = false
-//         failOnUnversionedFiles = false
-//         failOnCommitNeeded = false
-
-//         git {
-//            commitVersionFileOnly = true
-//         }
-//         /* publish before releasing
-//            buildTasks =['build', 'publish']
-//          */
-//     }
-
-//     afterReleaseBuild.dependsOn publish
-// }
-
 nativeImage {
     graalVmHome = System.getenv('GRAALVM_HOME')
     mainClass = application.mainClass
@@ -148,29 +110,4 @@ nativeImage {
         '--enable-all-security-services',
         '--report-unsupported-elements-at-runtime'
     )
-}
-
-// Upload to bintray with:
-//   ./gradlew clean build bintrayUpload --info
-// Needs properties: bintray_user, bintray_key.
-if (project.hasProperty('bintray_user') && project.hasProperty('bintray_key')) {
-    bintray {
-        user = bintray_user
-        key = bintray_key
-        publications = ['mavenJava']
-        configurations = ['archives']
-        pkg {
-            repo = 'plast-lab'
-            name = 'HeapDL'
-            desc = 'The HeapDL tool.'
-            licenses = ['MIT']
-            labels = ['java']
-            vcsUrl = 'https://github.com/plast-lab/HeapDL'
-            version {
-                name = project.version
-                released = new Date()
-                vcsTag = project.version
-            }
-        }
-    }
 }
