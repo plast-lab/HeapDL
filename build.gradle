@@ -43,7 +43,7 @@ dependencies {
     implementation "com.github.eaftan:hprof-parser:849678cca7"
     implementation "com.github.plast-lab:clue-common:${clueCommonVersion}"
 
-    runtimeOnly "com.google.guava:guava:33.5.0-jre" // needed by hprof-parser
+    runtimeOnly "com.google.guava:guava:33.7.1-jre" // needed by hprof-parser
 }
 
 compileJava {
